@@ -417,7 +417,8 @@ const navState = {tab:'home'};
 
 function render(){
   const {base,id} = parseHash();
-  let cfg = ROUTES[base];
+  // Prefer an exact multi-segment route (e.g. "orders/new") over the base route ("orders")
+  let cfg = (id && ROUTES[base+'/'+id]) ? ROUTES[base+'/'+id] : ROUTES[base];
   if(!cfg){ cfg=ROUTES['home']; }
   const view=$('#view');
   view.innerHTML='';
