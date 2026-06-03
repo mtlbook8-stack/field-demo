@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Field App — Wholesale Distributor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root{
+    --primary:#1a73e8; --primary-dark:#1557b0; --primary-light:#e8f0fe;
+    --success:#34a853; --warning:#fbbc04; --danger:#ea4335; --info:#4285f4;
+    --bg-primary:#f8f9fa; --bg-card:#ffffff;
+    --text-primary:#202124; --text-secondary:#5f6368; --text-muted:#9aa0a6;
+    --border:#e0e0e0;
+    --sh-sm:0 1px 2px rgba(0,0,0,.05); --sh-md:0 2px 8px rgba(0,0,0,.1); --sh-lg:0 4px 16px rgba(0,0,0,.15);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:#1f2937;color:var(--text-primary);
+    display:flex;align-items:center;justify-content:center;min-height:100vh;
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  /* Phone frame on desktop */
+  #phone{
+    position:relative;width:390px;height:844px;background:var(--bg-primary);
+    border-radius:44px;box-shadow:0 0 0 12px #111,0 20px 60px rgba(0,0,0,.5);
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+  @media (max-width:430px){
+    body{background:var(--bg-primary)}
+    #phone{width:100vw;height:100vh;border-radius:0;box-shadow:none}
+  }
+  #app{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden}
+  /* Header */
+  .pheader{height:56px;flex:0 0 56px;background:#fff;border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:8px;padding:0 12px;z-index:100}
+  .pheader h1{font-size:1.125rem;font-weight:600;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .iconbtn{width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:none;color:var(--text-secondary);cursor:pointer;flex:0 0 auto}
+  .iconbtn:active{background:#f1f3f4}
+  /* Scroll area */
+  #scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .page{padding:16px;padding-bottom:88px;animation:fadeIn .2s}
+  /* Bottom nav */
+  .bnav{height:56px;flex:0 0 56px;background:#fff;border-top:1px solid var(--border);
+    display:flex;z-index:100}
+  .bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.625rem}
+  .bnav button.active{color:var(--primary)}
+  .fab{position:absolute;right:16px;bottom:72px;width:56px;height:56px;border-radius:999px;
+    background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;
+    box-shadow:var(--sh-md);z-index:99;cursor:pointer}
+  .fab:active{transform:scale(.92)}
+  /* Cards & buttons */
+  .card{background:var(--bg-card);border-radius:12px;box-shadow:var(--sh-sm);padding:16px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:8px;
+    border:none;font-size:.875rem;font-weight:500;cursor:pointer;transition:opacity .15s,background .15s;white-space:nowrap}
+  .btn:active{opacity:.85}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-full{width:100%}
+  .btn-lg{padding:16px 24px;font-size:1rem}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  /* Inputs */
+  .inp{width:100%;padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);
+    font-size:1rem;color:var(--text-primary);outline:none}
+  .inp:focus{border-color:var(--primary)}
+  textarea.inp{resize:vertical;font-family:inherit}
+  /* Search chips */
+  .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);padding:6px 12px;border-radius:20px;
+    font-size:.8125rem;background:#fff;color:var(--text-secondary);cursor:pointer;white-space:nowrap}
+  .chip.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+  /* Status badge */
+  .badge{display:inline-flex;align-items:center;white-space:nowrap;padding:2px 10px;border-radius:999px;
+    font-size:.75rem;font-weight:600;line-height:1.4}
+  .badge.sm{padding:1px 6px}
+  /* Toast */
+  #toast-wrap{position:absolute;top:64px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:300;pointer-events:none}
+  .toast{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:8px;color:#fff;
+    font-size:.875rem;font-weight:500;box-shadow:var(--sh-md);animation:slideDown .25s ease-out;pointer-events:auto;max-width:340px}
+  .toast .x{width:24px;height:24px;border-radius:999px;background:rgba(255,255,255,.25);border:none;color:#fff;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+  /* Overlay & modals */
+  #overlay{position:absolute;inset:0;z-index:200;display:none;align-items:flex-end;justify-content:center}
+  #overlay.center{align-items:center}
+  .ov-bg{position:absolute;inset:0;background:rgba(0,0,0,.5)}
+  #overlay.center .ov-bg{background:rgba(0,0,0,.45)}
+  .sheet{position:relative;width:100%;max-height:88%;overflow-y:auto;background:#fff;border-radius:16px 16px 0 0;
+    padding:16px;animation:slideUp .25s ease-out;z-index:1}
+  .dialog{position:relative;width:calc(100% - 48px);max-width:340px;background:#fff;border-radius:12px;padding:20px;
+    box-shadow:var(--sh-lg);animation:fadeIn .15s;z-index:1}
+  /* Misc */
+  .muted{color:var(--text-muted)} .sec{color:var(--text-secondary)}
+  .divide>*+*{border-top:1px solid var(--border)}
+  .timeline-label{font-size:.625rem}
+  .row-link:active{background:#f8f9fa}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+  @keyframes slideDown{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  ::-webkit-scrollbar{width:0;height:0}
+</style>
+</head>
+<body>
+<div id="phone">
+  <div id="app">
+    <header class="pheader" id="pheader"></header>
+    <div id="scroll"><div id="view"></div></div>
+    <button class="fab" id="fab" onclick="location.hash='#orders/new'"><i data-lucide="plus"></i></button>
+    <nav class="bnav" id="bnav"></nav>
+  </div>
+  <div id="toast-wrap"></div>
+  <div id="overlay"><div class="ov-bg" onclick="closeOverlay()"></div><div id="ov-content"></div></div>
+</div>
+<script>
+/* ===================== HELPERS ===================== */
+const $ = s => document.querySelector(s);
+const money = n => '$' + (Number(n)||0).toFixed(2);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = p => p + '-' + Math.random().toString(36).slice(2,7);
+const todayISO = () => '2026-06-03';
+function fmtDate(d){ if(!d) return '—'; const dt=new Date(d); if(isNaN(dt)) return d;
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtDT(d){ const dt=new Date(d); return dt.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function ageBucket(dueDate){ // returns {label,bg,text}
+  const od = daysBetween(dueDate, todayISO());
+  if(od<=0) return {label:'Current',bg:'#dcfce7',text:'#166534'};
+  if(od<=30) return {label:'1–30',bg:'#fef9c3',text:'#854d0e'};
+  if(od<=60) return {label:'31–60',bg:'#ffedd5',text:'#9a3412'};
+  if(od<=90) return {label:'61–90',bg:'#fee2e2',text:'#991b1b'};
+  return {label:'90+',bg:'#f3e8ff',text:'#6b21a8'};
+}
+function icons(){ if(window.lucide) lucide.createIcons(); }
+
+/* ===================== MOCK DATA (mockData.js v6, 2026-03-15) ===================== */
+const USERS = [
+  {id:'u1', name:'John Rivera', firstName:'John', email:'john.rivera@distco.example', role:'Sales Person'},
+  {id:'u2', name:'Maria Santos', firstName:'Maria', email:'maria.santos@distco.example', role:'Sales Person'},
+  {id:'u3', name:'Dev Kumar', firstName:'Dev', email:'dev.kumar@distco.example', role:'Driver'},
+];
+const CURRENT_USER_ID='u1';
+
+const CATEGORIES = [
+  {id:'c1',name:'28oz Glass',icon:'🥂',sortOrder:1},
+  {id:'c2',name:'1 Liter Seltzer',icon:'💧',sortOrder:2},
+  {id:'c3',name:'1 Liter Flavor',icon:'🍶',sortOrder:3},
+  {id:'c4',name:'2 Liter Flavor',icon:'🍾',sortOrder:4},
+  {id:'c5',name:'Flavored Seltzer',icon:'✨',sortOrder:5},
+  {id:'c6',name:'Cans 12 Pack',icon:'🥫',sortOrder:6},
+  {id:'c7',name:'Cans 24 Pack',icon:'🥤',sortOrder:7},
+  {id:'c8',name:'16.9oz Vichy',icon:'💦',sortOrder:8},
+  {id:'c9',name:'16.9oz Flavor',icon:'🧴',sortOrder:9},
+  {id:'c10',name:'Spring Water',icon:'🫧',sortOrder:10},
+  {id:'c11',name:'Ice Tea & Drinks',icon:'🍵',sortOrder:11},
+  {id:'c12',name:'Clear Flavor',icon:'🔮',sortOrder:12},
+  {id:'c13',name:'Syrup Gallons',icon:'🪣',sortOrder:13},
+  {id:'c14',name:'Syrup Containers',icon:'🫙',sortOrder:14},
+  {id:'c15',name:'Kids Drinks',icon:'🧃',sortOrder:15},
+  {id:'c16',name:'First Class',icon:'⭐',sortOrder:16},
+  {id:'c17',name:'10x Energy',icon:'⚡',sortOrder:17},
+  {id:'c18',name:'Halo2',icon:'💎',sortOrder:18},
+  {id:'c19',name:'Yo Bev',icon:'🥝',sortOrder:19},
+];
+const PRODUCTS = [
+  {id:'p1',code:'10001',name:'Classic Cola 28oz Glass',flavor:'Cola',categoryId:'c1',size:'28oz',material:'Glass',packSize:'12-pack',unitsPerCase:12,casePrice:14.40,unitPrice:1.45,depositPerCase:1.20,stock:3,overStockLimit:20,status:'Active'},
+  {id:'p2',code:'10002',name:'Lemon Lime 28oz Glass',flavor:'Lemon Lime',categoryId:'c1',size:'28oz',material:'Glass',packSize:'12-pack',unitsPerCase:12,casePrice:14.40,unitPrice:1.45,depositPerCase:1.20,stock:5,overStockLimit:20,status:'Active'},
+  {id:'p3',code:'10010',name:'Pure Seltzer 1L',flavor:'Original',categoryId:'c2',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:9.60,unitPrice:0.95,depositPerCase:0.60,stock:8,overStockLimit:30,status:'Active'},
+  {id:'p4',code:'10011',name:'Lime Seltzer 1L',flavor:'Lime',categoryId:'c2',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:9.60,unitPrice:0.95,depositPerCase:0.60,stock:0,overStockLimit:30,status:'Active'},
+  {id:'p5',code:'10020',name:'Orange Flavor 1L',flavor:'Orange',categoryId:'c3',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:10.80,unitPrice:1.05,depositPerCase:0.60,stock:12,overStockLimit:30,status:'Active'},
+  {id:'p6',code:'10021',name:'Grape Flavor 1L',flavor:'Grape',categoryId:'c3',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:10.80,unitPrice:1.05,depositPerCase:0.60,stock:6,overStockLimit:30,status:'Active'},
+  {id:'p7',code:'10030',name:'Cola 2L',flavor:'Cola',categoryId:'c4',size:'2L',material:'PET',packSize:'6-pack',unitsPerCase:6,casePrice:8.40,unitPrice:1.55,depositPerCase:0.30,stock:9,overStockLimit:25,status:'Active'},
+  {id:'p8',code:'10031',name:'Root Beer 2L',flavor:'Root Beer',categoryId:'c4',size:'2L',material:'PET',packSize:'6-pack',unitsPerCase:6,casePrice:8.40,unitPrice:1.55,depositPerCase:0.30,stock:4,overStockLimit:25,status:'Active'},
+  {id:'p9',code:'10040',name:'Berry Flavored Seltzer',flavor:'Mixed Berry',categoryId:'c5',size:'12oz',material:'Can',packSize:'8-pack',unitsPerCase:8,casePrice:7.20,unitPrice:1.00,depositPerCase:0.40,stock:15,overStockLimit:40,status:'Active'},
+  {id:'p10',code:'10050',name:'Cola 12-Pack Cans',flavor:'Cola',categoryId:'c6',size:'12oz',material:'Can',packSize:'12-pack',unitsPerCase:12,casePrice:6.00,unitPrice:0.60,depositPerCase:0.60,stock:20,overStockLimit:50,status:'Active'},
+  {id:'p11',code:'10051',name:'Diet Cola 12-Pack Cans',flavor:'Diet Cola',categoryId:'c6',size:'12oz',material:'Can',packSize:'12-pack',unitsPerCase:12,casePrice:6.00,unitPrice:0.60,depositPerCase:0.60,stock:2,overStockLimit:50,status:'Active'},
+  {id:'p12',code:'10060',name:'Cola 24-Pack Cans',flavor:'Cola',categoryId:'c7',size:'12oz',material:'Can',packSize:'24-pack',unitsPerCase:24,casePrice:11.50,unitPrice:0.55,depositPerCase:1.20,stock:18,overStockLimit:50,status:'Active'},
+  {id:'p13',code:'10061',name:'Ginger Ale 24-Pack Cans',flavor:'Ginger Ale',categoryId:'c7',size:'12oz',material:'Can',packSize:'24-pack',unitsPerCase:24,casePrice:11.50,unitPrice:0.55,depositPerCase:1.20,stock:7,overStockLimit:50,status:'Active'},
+  {id:'p14',code:'10070',name:'Vichy Mineral 16.9oz',flavor:'Mineral',categoryId:'c8',size:'16.9oz',material:'PET',packSize:'24-pack',unitsPerCase:24,casePrice:9.00,unitPrice:0.45,depositPerCase:1.20,stock:25,overStockLimit:60,status:'Active'},
+  {id:'p15',code:'10080',name:'Peach Flavor 16.9oz',flavor:'Peach',categoryId:'c9',size:'16.9oz',material:'PET',packSize:'24-pack',unitsPerCase:24,casePrice:10.80,unitPrice:0.50,depositPerCase:1.20,stock:11,overStockLimit:60,status:'Active'},
+  {id:'p16',code:'10090',name:'Spring Water 16.9oz',flavor:'Spring',categoryId:'c10',size:'16.9oz',material:'PET',packSize:'24-pack',unitsPerCase:24,casePrice:6.00,unitPrice:0.30,depositPerCase:1.20,stock:30,overStockLimit:80,status:'Active'},
+  {id:'p17',code:'10100',name:'Lemon Ice Tea 1L',flavor:'Lemon',categoryId:'c11',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:11.40,unitPrice:1.10,depositPerCase:0.60,stock:9,overStockLimit:30,status:'Active'},
+  {id:'p18',code:'10101',name:'Peach Ice Tea 1L',flavor:'Peach',categoryId:'c11',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:11.40,unitPrice:1.10,depositPerCase:0.60,stock:0,overStockLimit:30,status:'Active'},
+  {id:'p19',code:'10110',name:'Clear Citrus 1L',flavor:'Citrus',categoryId:'c12',size:'1L',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:10.20,unitPrice:1.00,depositPerCase:0.60,stock:14,overStockLimit:30,status:'Active'},
+  {id:'p20',code:'10120',name:'Cola Syrup Gallon',flavor:'Cola',categoryId:'c13',size:'1gal',material:'Jug',packSize:'each',unitsPerCase:1,casePrice:18.00,unitPrice:18.00,depositPerCase:0.00,stock:6,overStockLimit:15,status:'Active'},
+  {id:'p21',code:'10130',name:'Lemonade Syrup Container 2.5gal',flavor:'Lemonade',categoryId:'c14',size:'2.5gal',material:'BIB',packSize:'each',unitsPerCase:1,casePrice:34.00,unitPrice:34.00,depositPerCase:0.00,stock:4,overStockLimit:10,status:'Active'},
+  {id:'p22',code:'10140',name:'Fruit Punch Kids Pouch',flavor:'Fruit Punch',categoryId:'c15',size:'6oz',material:'Pouch',packSize:'40-pack',unitsPerCase:40,casePrice:12.00,unitPrice:0.35,depositPerCase:0.00,stock:16,overStockLimit:40,status:'Active'},
+  {id:'p23',code:'10150',name:'First Class Sparkling 750ml',flavor:'Sparkling',categoryId:'c16',size:'750ml',material:'Glass',packSize:'12-pack',unitsPerCase:12,casePrice:24.00,unitPrice:2.30,depositPerCase:1.20,stock:5,overStockLimit:20,status:'Active'},
+  {id:'p24',code:'10160',name:'10x Energy Original',flavor:'Original',categoryId:'c17',size:'8.4oz',material:'Can',packSize:'24-pack',unitsPerCase:24,casePrice:36.00,unitPrice:1.80,depositPerCase:1.20,stock:8,overStockLimit:30,status:'Active'},
+  {id:'p25',code:'10161',name:'10x Energy Sugar Free',flavor:'Sugar Free',categoryId:'c17',size:'8.4oz',material:'Can',packSize:'24-pack',unitsPerCase:24,casePrice:36.00,unitPrice:1.80,depositPerCase:1.20,stock:0,overStockLimit:30,status:'Active'},
+  {id:'p26',code:'10170',name:'Halo2 Hydration Blue',flavor:'Blue Raspberry',categoryId:'c18',size:'20oz',material:'PET',packSize:'12-pack',unitsPerCase:12,casePrice:15.60,unitPrice:1.55,depositPerCase:0.60,stock:10,overStockLimit:30,status:'Active'},
+  {id:'p27',code:'10180',name:'Yo Bev Probiotic Mango',flavor:'Mango',categoryId:'c19',size:'14oz',material:'Glass',packSize:'12-pack',unitsPerCase:12,casePrice:21.60,unitPrice:2.10,depositPerCase:1.20,stock:3,overStockLimit:18,status:'Active'},
+  {id:'p28',code:'10181',name:'Yo Bev Probiotic Berry',flavor:'Berry',categoryId:'c19',size:'14oz',material:'Glass',packSize:'12-pack',unitsPerCase:12,casePrice:21.60,unitPrice:2.10,depositPerCase:1.20,stock:7,overStockLimit:18,status:'Inactive'},
+];
+const PROD = id => PRODUCTS.find(p=>p.id===id);
+const CAT = id => CATEGORIES.find(c=>c.id===id);
+const CUSTOMERS = [
+  {id:'cu1',name:'Bella Italia Restaurant',code:'BELL-001',contact:'Tony Bellini',phone:'212-555-0101',email:'orders@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:1240.50,creditLimit:5000,terms:'NET-30',address:'120 Mulberry St, New York, NY 10013',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-28',avgOrderCases:32,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prefers Tuesday deliveries. Call ahead.',date:'2026-04-10T10:00:00'}],parentId:null,isBranch:false,createdDate:'2024-02-15',savedPaymentMethods:[{id:'pm1',type:'credit_card',last4:'4242',brand:'Visa',expiry:'12/27',isDefault:true}]},
+  {id:'cu2',name:'Corner Deli & Grocery',code:'CORN-002',contact:'Sam Park',phone:'718-555-0144',email:'sam@cornerdeli.example',type:'Deli',paymentType:'credit',creditTier:'B',balance:3890.00,creditLimit:4000,terms:'NET-15',address:'880 Atlantic Ave, Brooklyn, NY 11238',billingAddress:'880 Atlantic Ave, Brooklyn, NY 11238',priceLevel:'B',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-30',avgOrderCases:18,accountCredit:50.00,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2023-11-02',savedPaymentMethods:[{id:'pm2',type:'ach',last4:'8891',brand:'Chase',expiry:'',isDefault:true}]},
+  {id:'cu3',name:'Sunrise Caterers',code:'SUNR-003',contact:'Lena Ortiz',phone:'917-555-0188',email:'events@sunrisecater.example',type:'Caterer',paymentType:'credit',creditTier:'A',balance:0,creditLimit:8000,terms:'NET-30',address:'45 Hudson St, Jersey City, NJ 07302',billingAddress:'45 Hudson St, Jersey City, NJ 07302',priceLevel:'A',route:'Route 3 — NJ',status:'Active',lastOrderDate:'2026-05-20',avgOrderCases:55,accountCredit:120.00,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2022-06-19',savedPaymentMethods:[]},
+  {id:'cu4',name:'Java House Cafe',code:'JAVA-004',contact:'Mike Chen',phone:'646-555-0170',email:'mike@javahouse.example',type:'Cafe',paymentType:'prepaid',creditTier:null,balance:210.00,creditLimit:0,terms:'Prepaid',address:'300 Bedford Ave, Brooklyn, NY 11211',billingAddress:'300 Bedford Ave, Brooklyn, NY 11211',priceLevel:'C',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-31',avgOrderCases:9,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prepaid only. No credit.',date:'2026-01-05T09:00:00'}],parentId:null,isBranch:false,createdDate:'2025-01-22',savedPaymentMethods:[{id:'pm3',type:'credit_card',last4:'1881',brand:'Mastercard',expiry:'08/26',isDefault:true}]},
+  {id:'cu5',name:'Grand Plaza Hotel',code:'GRAN-005',contact:'Patricia Wells',phone:'212-555-0199',email:'fnb@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:6420.75,creditLimit:15000,terms:'NET-30',address:'768 5th Ave, New York, NY 10019',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-29',avgOrderCases:88,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2021-03-30',savedPaymentMethods:[{id:'pm4',type:'credit_card',last4:'9003',brand:'Amex',expiry:'04/28',isDefault:true},{id:'pm5',type:'ach',last4:'2210',brand:'Citi',expiry:'',isDefault:false}]},
+  {id:'cu6',name:'Maple Street Bakery',code:'MAPL-006',contact:'Grace Liu',phone:'347-555-0122',email:'grace@maplebakery.example',type:'Bakery',paymentType:'credit',creditTier:'C',balance:980.00,creditLimit:1000,terms:'NET-15',address:'52 Maple St, Queens, NY 11375',billingAddress:'52 Maple St, Queens, NY 11375',priceLevel:'B',route:'Route 4 — Queens',status:'Hold',lastOrderDate:'2026-04-15',avgOrderCases:7,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'On hold — balance near limit.',date:'2026-05-01T12:00:00'}],parentId:null,isBranch:false,createdDate:'2024-08-11',savedPaymentMethods:[]},
+  {id:'cu7',name:'The Tap Room',code:'TAPR-007',contact:'Dan Murphy',phone:'212-555-0166',email:'dan@taproom.example',type:'Bar',paymentType:'credit',creditTier:'B',balance:2150.00,creditLimit:6000,terms:'NET-30',address:'14 Stone St, New York, NY 10004',billingAddress:'14 Stone St, New York, NY 10004',priceLevel:'B',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-27',avgOrderCases:24,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2023-05-14',savedPaymentMethods:[{id:'pm6',type:'credit_card',last4:'7777',brand:'Visa',expiry:'11/27',isDefault:true}]},
+  {id:'cu8',name:'Fresh Market Grocery',code:'FRES-008',contact:'Omar Haddad',phone:'718-555-0133',email:'omar@freshmarket.example',type:'Grocery',paymentType:'credit',creditTier:'A',balance:0,creditLimit:10000,terms:'NET-30',address:'200 Steinway St, Queens, NY 11103',billingAddress:'200 Steinway St, Queens, NY 11103',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-06-01',avgOrderCases:64,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2020-09-08',savedPaymentMethods:[{id:'pm7',type:'ach',last4:'5540',brand:'Chase',expiry:'',isDefault:true}]},
+  // Branches
+  {id:'cu1b',name:'Bella Italia — Midtown',code:'BELL-001-B',contact:'Rosa Bellini',phone:'212-555-0102',email:'midtown@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'455 W 51st St, New York, NY 10019',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-22',avgOrderCases:14,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:'cu1',isBranch:true,createdDate:'2024-09-01',savedPaymentMethods:[]},
+  {id:'cu5b',name:'Grand Plaza — Airport',code:'GRAN-005-B',contact:'Leo Park',phone:'718-555-0200',email:'airport@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'1 Terminal Dr, Queens, NY 11430',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-05-18',avgOrderCases:40,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:'cu5',isBranch:true,createdDate:'2023-02-12',savedPaymentMethods:[]},
+];
+const CUST = id => CUSTOMERS.find(c=>c.id===id);
+const billCust = c => c.isBranch && c.parentId ? CUST(c.parentId) : c;
+function mkLine(productId, qty, discount){
+  const p=PROD(productId); const d=discount||0;
+  const lineTotal=(p.casePrice-d)*qty; const depositTotal=p.depositPerCase*qty;
+  return {lineId:uid('ln'),productId:p.id,productCode:p.code,productName:p.name,quantity:qty,unitsPerCase:p.unitsPerCase,
+    casePrice:p.casePrice,unitPrice:p.unitPrice,depositPerCase:p.depositPerCase,discount:d,lineTotal,depositTotal};
+}
+function rollup(lineItems, orderDiscount){
+  const subtotal=lineItems.reduce((s,l)=>s+l.casePrice*l.quantity,0);
+  const lineDisc=lineItems.reduce((s,l)=>s+l.discount*l.quantity,0);
+  const depositTotal=lineItems.reduce((s,l)=>s+l.depositTotal,0);
+  const totalCases=lineItems.reduce((s,l)=>s+l.quantity,0);
+  const od=orderDiscount||0;
+  const discountTotal=lineDisc+od;
+  const grandTotal=subtotal-discountTotal+depositTotal;
+  return {subtotal,depositTotal,discountTotal,grandTotal,totalCases};
+}
+function makeOrder(o){ const r=rollup(o.lineItems,o.orderDiscount||0); return Object.assign({orderDiscount:0},o,r); }
+
+const ORDERS = [
+  makeOrder({id:'o1',orderNumber:'ORD-20260601-001',customerId:'cu8',salespersonId:'u1',status:'Delivered',
+    lineItems:[mkLine('p16',10,0),mkLine('p12',8,0.5),mkLine('p10',12,0)],deliveryDate:'2026-06-02',notes:'',createdDate:'2026-06-01T09:12:00',modifiedDate:'2026-06-02T14:00:00'}),
+  makeOrder({id:'o2',orderNumber:'ORD-20260530-002',customerId:'cu2',salespersonId:'u1',status:'Picking',
+    lineItems:[mkLine('p3',6,0),mkLine('p17',4,0)],deliveryDate:'2026-06-03',notes:'Leave at side door',createdDate:'2026-05-30T15:40:00',modifiedDate:'2026-06-02T08:00:00'}),
+  makeOrder({id:'o3',orderNumber:'ORD-20260531-003',customerId:'cu4',salespersonId:'u1',status:'Submitted',
+    lineItems:[mkLine('p9',5,0),mkLine('p26',3,0)],deliveryDate:'2026-06-03',notes:'',createdDate:'2026-05-31T11:05:00',modifiedDate:'2026-05-31T11:05:00'}),
+  makeOrder({id:'o4',orderNumber:'ORD-20260529-004',customerId:'cu5',salespersonId:'u2',status:'Delivered',
+    lineItems:[mkLine('p24',6,2),mkLine('p23',4,0),mkLine('p14',10,0)],deliveryDate:'2026-05-30',notes:'',createdDate:'2026-05-29T08:00:00',modifiedDate:'2026-05-30T16:00:00'}),
+  makeOrder({id:'o5',orderNumber:'ORD-20260528-005',customerId:'cu1',salespersonId:'u1',status:'Delivered',
+    lineItems:[mkLine('p1',3,0),mkLine('p7',6,0),mkLine('p20',2,0)],deliveryDate:'2026-05-29',notes:'',createdDate:'2026-05-28T10:00:00',modifiedDate:'2026-05-29T13:00:00'}),
+  makeOrder({id:'o6',orderNumber:'ORD-20260603-006',customerId:'cu1b',salespersonId:'u1',status:'Submitted',
+    lineItems:[mkLine('p2',4,0),mkLine('p13',5,0)],deliveryDate:'2026-06-03',notes:'Deliver to Midtown branch',createdDate:'2026-06-03T07:30:00',modifiedDate:'2026-06-03T07:30:00'}),
+  makeOrder({id:'o7',orderNumber:'ORD-20260527-007',customerId:'cu7',salespersonId:'u2',status:'Cancelled',
+    lineItems:[mkLine('p10',6,0)],deliveryDate:'2026-05-28',notes:'Customer cancelled',createdDate:'2026-05-27T14:00:00',modifiedDate:'2026-05-27T16:00:00'}),
+  makeOrder({id:'o8',orderNumber:'ORD-20260603-008',customerId:'cu5b',salespersonId:'u2',status:'Submitted',
+    lineItems:[mkLine('p16',12,0),mkLine('p14',8,0)],deliveryDate:'2026-06-03',notes:'',createdDate:'2026-06-03T06:50:00',modifiedDate:'2026-06-03T06:50:00'}),
+];
+const ORD = id => ORDERS.find(o=>o.id===id);
+
+function makeInvoice(inv){ const r=rollup(inv.lineItems,inv.discountTotalExtra||0); const amountDue=r.grandTotal-(inv.amountPaid||0);
+  return Object.assign({},inv,r,{amountDue}); }
+const INVOICES = [
+  makeInvoice({id:'i1',invoiceNumber:'INV-20260602-001',orderId:'o1',customerId:'cu8',status:'Paid',lineItems:ORD('o1').lineItems,amountPaid:ORD('o1').grandTotal,dueDate:'2026-07-02',createdDate:'2026-06-02',paidDate:'2026-06-02'}),
+  makeInvoice({id:'i2',invoiceNumber:'INV-20260530-002',orderId:'o4',customerId:'cu5',status:'Partial',lineItems:ORD('o4').lineItems,amountPaid:200,dueDate:'2026-06-29',createdDate:'2026-05-30',paidDate:null}),
+  makeInvoice({id:'i3',invoiceNumber:'INV-20260529-003',orderId:'o5',customerId:'cu1',status:'Open',lineItems:ORD('o5').lineItems,amountPaid:0,dueDate:'2026-06-28',createdDate:'2026-05-29',paidDate:null}),
+  makeInvoice({id:'i4',invoiceNumber:'INV-20260415-004',orderId:null,customerId:'cu6',status:'Overdue',lineItems:[mkLine('p27',4,0),mkLine('p22',6,0)],amountPaid:0,dueDate:'2026-05-15',createdDate:'2026-04-15',paidDate:null}),
+  makeInvoice({id:'i5',invoiceNumber:'INV-20260420-005',orderId:null,customerId:'cu2',status:'Overdue',lineItems:[mkLine('p3',8,0),mkLine('p10',10,0)],amountPaid:0,dueDate:'2026-05-20',createdDate:'2026-04-20',paidDate:null}),
+];
+const INV = id => INVOICES.find(i=>i.id===id);
+function recomputeInvoiceStatus(inv){
+  if(inv.amountDue<=0.005){inv.status='Paid'; if(!inv.paidDate)inv.paidDate=todayISO();}
+  else if(inv.amountPaid>0) inv.status='Partial';
+  else if(daysBetween(inv.dueDate,todayISO())>0) inv.status='Overdue';
+  else inv.status='Open';
+}
+
+const PAYMENTS = [
+  {id:'pay1',customerId:'cu8',amount:ORD('o1').grandTotal,method:'ACH',appliedTo:[{invoiceId:'i1',amount:ORD('o1').grandTotal}],unappliedAmount:0,reference:'ACH-99021',date:'2026-06-02T14:30:00',collectedBy:'u1'},
+  {id:'pay2',customerId:'cu5',amount:200,method:'Check',appliedTo:[{invoiceId:'i2',amount:200}],unappliedAmount:0,reference:'CHK-5521',date:'2026-05-31T10:00:00',collectedBy:'u2'},
+  {id:'pay3',customerId:'cu3',amount:120,method:'Cash',appliedTo:[],unappliedAmount:120,reference:'',date:'2026-05-25T12:00:00',collectedBy:'u2'},
+];
+const RETURN_REASONS = [
+  {id:'damaged',icon:'💔',label:'Damaged Product'},
+  {id:'wrong_item',icon:'❌',label:'Wrong Item Delivered'},
+  {id:'quality',icon:'⚠️',label:'Quality Issue'},
+  {id:'overstocked',icon:'📦',label:'Customer Overstocked'},
+  {id:'expired',icon:'📅',label:'Expired/Near Expiry'},
+  {id:'customer_changed_mind',icon:'🔄',label:'Customer Changed Mind'},
+  {id:'other',icon:'📝',label:'Other'},
+];
+const DAMAGE_TYPES = ['crushed','leaking','broken','contaminated','temperature','other'];
+const REFUSE_REASONS = ['out_of_stock_at_customer','wrong_item','damaged_on_arrival','customer_unavailable','other'];
+
+function makeReturn(rt){ const r=rollup(rt.lineItems,0);
+  return Object.assign({creditApplied:rt.status==='Processed'?r.grandTotal:0},rt,r); }
+const RETURNS = [
+  makeReturn({id:'r1',returnNumber:'RET-20260601-001',customerId:'cu8',salespersonId:'u1',status:'Processed',originalOrderId:'o1',returnReason:'damaged',
+    lineItems:[Object.assign(mkLine('p16',2,0),{isDamaged:true,damageType:'crushed'})],notes:'2 cases crushed in transit',createdDate:'2026-06-01T16:00:00',modifiedDate:'2026-06-01T16:00:00',processedDate:'2026-06-02T09:00:00'}),
+  makeReturn({id:'r2',returnNumber:'RET-20260530-002',customerId:'cu5',salespersonId:'u2',status:'Pending',originalOrderId:'o4',returnReason:'overstocked',
+    lineItems:[Object.assign(mkLine('p14',3,0),{isDamaged:false,damageType:null})],notes:'',createdDate:'2026-05-30T17:00:00',modifiedDate:'2026-05-30T17:00:00',processedDate:null}),
+];
+const RET = id => RETURNS.find(r=>r.id===id);
+
+const RECENT_ACTIVITY = [
+  {id:'a1',type:'order',text:'Order #ORD-20260603-008 placed — Grand Plaza — Airport',date:'2026-06-03T06:50:00',linkTo:'#orders/o8'},
+  {id:'a2',type:'order',text:'Order #ORD-20260603-006 placed — Bella Italia — Midtown',date:'2026-06-03T07:30:00',linkTo:'#orders/o6'},
+  {id:'a3',type:'payment',text:'Payment $'+ORD('o1').grandTotal.toFixed(2)+' — Fresh Market Grocery',date:'2026-06-02T14:30:00',linkTo:'#payments'},
+  {id:'a4',type:'delivery',text:'Delivery confirmed — Fresh Market Grocery',date:'2026-06-02T14:00:00',linkTo:'#orders/o1'},
+  {id:'a5',type:'order',text:'Order #ORD-20260531-003 placed — Java House Cafe',date:'2026-05-31T11:05:00',linkTo:'#orders/o3'},
+  {id:'a6',type:'payment',text:'Payment $200.00 — Grand Plaza Hotel',date:'2026-05-31T10:00:00',linkTo:'#payments'},
+];
+
+const NOTIFICATIONS = [
+  {id:'n1',userId:'u1',icon:'truck',iconType:'delivery',title:'Order delivered',body:'ORD-20260601-001 delivered to Fresh Market Grocery',ts:'2026-06-02T14:00:00',read:false,linkTo:'#orders/o1'},
+  {id:'n2',userId:'u1',icon:'dollar-sign',iconType:'payment',title:'Payment received',body:'$'+ORD('o1').grandTotal.toFixed(2)+' from Fresh Market Grocery',ts:'2026-06-02T14:30:00',read:false,linkTo:'#payments'},
+  {id:'n3',userId:'u1',icon:'alert-triangle',iconType:'overdue',title:'Account overdue',body:'Corner Deli & Grocery has an overdue invoice INV-20260420-005',ts:'2026-06-01T08:00:00',read:false,linkTo:'#customers/cu2'},
+  {id:'n4',userId:'u1',icon:'check-square',iconType:'task',title:'Task assigned',body:'Follow up on Maple Street Bakery hold',ts:'2026-05-31T09:00:00',read:true,linkTo:'#tasks'},
+  {id:'n5',userId:'u1',icon:'package',iconType:'order',title:'Order out for delivery',body:'ORD-20260530-002 is out for delivery',ts:'2026-06-03T07:00:00',read:false,linkTo:'#orders/o2'},
+];
+
+const TASKS = [
+  {id:'t1',title:'Follow up on Maple Street Bakery hold',description:'Balance near limit — discuss payment plan.',creatorId:'u2',assigneeId:'u1',dueDate:'2026-06-04',priority:'High',status:'Open',tag:{type:'Customer',id:'MAPL-006',link:'#customers/cu6'}},
+  {id:'t2',title:'Collect overdue from Corner Deli',description:'',creatorId:'u1',assigneeId:'u1',dueDate:'2026-05-29',priority:'High',status:'In Progress',tag:{type:'Overdue Invoice',id:'INV-20260420-005',link:'#customers/cu2'}},
+  {id:'t3',title:'Confirm Grand Plaza standing order',description:'',creatorId:'u1',assigneeId:'u2',dueDate:'2026-06-06',priority:'Med',status:'Open',tag:{type:'Order',id:'ORD-20260529-004',link:'#orders/o4'}},
+  {id:'t4',title:'Process Sunrise account credit',description:'',creatorId:'u1',assigneeId:'u1',dueDate:'2026-06-10',priority:'Low',status:'Done',tag:{type:'Payment',id:'PAY-pay3',link:'#payments'}},
+];
+
+const PAYMENT_LINKS = [
+  {id:'pl1',customerId:'cu6',allocation:'Invoice INV-20260415-004',amount:INV('i4').amountDue,channel:'Email',message:'Please settle your overdue balance.',status:'sent',sentAt:'2026-06-01T09:00:00',paidAt:null},
+  {id:'pl2',customerId:'cu2',allocation:'Invoice INV-20260420-005',amount:INV('i5').amountDue,channel:'SMS',message:'',status:'viewed',sentAt:'2026-05-30T10:00:00',paidAt:null},
+];
+
+const DISCOUNT_SETTINGS = {perItemFixed:5.00, perItemPercent:15, perOrderFixed:50.00, perOrderPercent:10};
+const DELIVERY_DAYS = [1,2,3,4,5];
+
+// Driver route — today's stops (Submitted/Picking orders for today)
+const ROUTE_STOPS = [
+  {id:'s1',orderId:'o2',status:'Pending',seq:1},
+  {id:'s2',orderId:'o6',status:'Pending',seq:2},
+  {id:'s3',orderId:'o8',status:'Pending',seq:3},
+  {id:'s4',orderId:'o3',status:'Arrived',seq:4},
+];
+const STOP = id => ROUTE_STOPS.find(s=>s.id===id);
+/* ===================== STATE ===================== */
+const state = {
+  role:'Sales Person',            // 'Sales Person' | 'Driver'
+  notificationsMuted:false,
+  favorites:new Set(['p10','p16']),
+  wizard:null,                    // order wizard working state
+  returnWizard:null,              // return wizard working state
+};
+const me = () => USERS.find(u=>u.id===CURRENT_USER_ID);
+const unreadCount = () => NOTIFICATIONS.filter(n=>n.userId===CURRENT_USER_ID && !n.read).length;
+const myTasks = () => TASKS.filter(t=>t.assigneeId===CURRENT_USER_ID);
+const openTasks = () => TASKS.filter(t=>t.status!=='Done'&&t.status!=='Cancelled');
+const pendingLinks = () => PAYMENT_LINKS.filter(p=>p.status!=='paid'&&p.status!=='expired');
+
+/* ===================== TOAST ===================== */
+function toast(msg, variant='success'){
+  const colors={success:'#1e7e34',error:'#c5221f',warning:'#d97706'};
+  const ic={success:'check-circle',error:'x-circle',warning:'alert-triangle'};
+  const wrap=$('#toast-wrap'); const el=document.createElement('div');
+  el.className='toast'; el.style.background=colors[variant]||colors.success;
+  el.innerHTML=`<i data-lucide="${ic[variant]||'check-circle'}" style="width:18px;height:18px"></i><span style="flex:1">${esc(msg)}</span><button class="x" aria-label="close"><i data-lucide="x" style="width:14px;height:14px"></i></button>`;
+  el.querySelector('.x').onclick=()=>el.remove();
+  wrap.appendChild(el); icons();
+  setTimeout(()=>{el.style.opacity='0';el.style.transition='opacity .2s';setTimeout(()=>el.remove(),200);},3000);
+}
+
+/* ===================== OVERLAY / MODAL ===================== */
+function openSheet(html){ const ov=$('#overlay'); ov.classList.remove('center');
+  $('#ov-content').className='sheet'; $('#ov-content').innerHTML=html; ov.style.display='flex'; icons(); }
+function openDialog(html){ const ov=$('#overlay'); ov.classList.add('center');
+  $('#ov-content').className='dialog'; $('#ov-content').innerHTML=html; ov.style.display='flex'; icons(); }
+function closeOverlay(){ const ov=$('#overlay'); ov.style.display='none'; $('#ov-content').innerHTML=''; }
+function confirmDialog(title,msg,onYes,yesLabel='Confirm',danger=false){
+  openDialog(`<h3 style="margin:0 0 8px;font-size:1.125rem;font-weight:600">${esc(title)}</h3>
+    <p class="sec" style="margin:0 0 16px;font-size:.9rem">${esc(msg)}</p>
+    <div style="display:flex;gap:8px"><button class="btn btn-secondary btn-full" onclick="closeOverlay()">Cancel</button>
+    <button class="btn ${danger?'btn-danger':'btn-primary'} btn-full" id="cdYes">${esc(yesLabel)}</button></div>`);
+  $('#cdYes').onclick=()=>{closeOverlay(); onYes&&onYes();};
+}
+
+/* ===================== SHARED COMPONENTS ===================== */
+function statusBadge(status){
+  const map={
+    Active:'green',Delivered:'green',Paid:'green',Processed:'green',
+    Hold:'red',Cancelled:'red',Overdue:'red',Rejected:'red',Refused:'red',
+    Submitted:'blue',Open:'blue',Arrived:'blue',sent:'blue',
+    Picking:'yellow',Partial:'yellow',Pending:'yellow',viewed:'yellow',
+    Draft:'gray',Inactive:'gray',
+  };
+  const styles={green:['#e6f4ea','#1e7e34'],red:['#fce8e6','#c5221f'],blue:['#e8f0fe','#1a73e8'],
+    yellow:['#fef7e0','#b06000'],gray:['#f1f3f4','#5f6368']};
+  let label=status;
+  if(status==='paid'){label='Paid';} if(status==='sent'){label='Sent';} if(status==='viewed'){label='Viewed';} if(status==='expired'){label='Expired';}
+  const fam=styles[map[status]||'gray'];
+  return `<span class="badge" style="background:${fam[0]};color:${fam[1]}">${esc(label)}</span>`;
+}
+function mapsLink(addr){ return `https://maps.google.com/?q=${encodeURIComponent(addr)}`; }
+function creditBar(balance, limit){
+  if(!limit) return '';
+  const pct=Math.min(100, Math.round((balance/limit)*100));
+  const color=pct>90?'var(--danger)':pct>66?'#f59e0b':'var(--success)';
+  return `<div style="height:6px;background:#eee;border-radius:999px;overflow:hidden;margin-top:4px">
+    <div style="height:100%;width:${pct}%;background:${color}"></div></div>`;
+}
+function backBtn(){ return `<button class="iconbtn" onclick="history.back()"><i data-lucide="arrow-left"></i></button>`; }
+function empty(icon,title,msg){ return `<div style="text-align:center;padding:48px 16px;color:var(--text-muted)">
+  <i data-lucide="${icon}" style="width:40px;height:40px"></i>
+  <div style="font-weight:600;margin-top:8px;color:var(--text-secondary)">${esc(title)}</div>
+  <div style="font-size:.85rem;margin-top:4px">${esc(msg||'')}</div></div>`; }
+/* ===================== ROUTER ===================== */
+const ROUTES = {}; // name -> {render, title, header, hideFab, hideNav}
+function route(name, cfg){ ROUTES[name]=cfg; }
+
+function parseHash(){
+  let h=location.hash.replace(/^#/,'')||'home';
+  const parts=h.split('/');
+  return {base:parts[0], id:parts[1], extra:parts[2], raw:h};
+}
+const navState = {tab:'home'};
+
+function render(){
+  const {base,id} = parseHash();
+  let cfg = ROUTES[base];
+  if(!cfg){ cfg=ROUTES['home']; }
+  const view=$('#view');
+  view.innerHTML='';
+  const ctx={id, base};
+  const out = cfg.render(ctx) || '';
+  view.innerHTML = `<div class="page">${out}</div>`;
+  renderHeader(cfg, ctx);
+  renderNav(base);
+  // FAB visibility
+  const hideFab = cfg.hideFab || state.role!=='Sales Person' && false;
+  $('#fab').style.display = cfg.hideFab ? 'none':'flex';
+  $('#scroll').scrollTop=0;
+  icons();
+  if(cfg.after) cfg.after(ctx);
+}
+
+function renderHeader(cfg, ctx){
+  const h=$('#pheader');
+  const title = typeof cfg.title==='function' ? cfg.title(ctx) : (cfg.title||'');
+  const showBack = !cfg.root;
+  let right='';
+  if(cfg.headerRight) right=cfg.headerRight(ctx);
+  h.innerHTML = `${showBack?backBtn():'<div style="width:36px"></div>'}
+    <h1>${esc(title)}</h1>
+    <div style="display:flex;gap:8px;align-items:center">${right}</div>`;
+  icons();
+}
+
+function bellBtn(){
+  const c=unreadCount();
+  return `<button class="iconbtn" onclick="location.hash='#notifications'" style="position:relative">
+    <i data-lucide="bell"></i>
+    ${c>0?`<span style="position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${c}</span>`:''}
+  </button>`;
+}
+
+function renderNav(base){
+  const nav=$('#bnav');
+  const first = state.role==='Driver' ? {id:'route',label:'Route',icon:'truck',hash:'#route'} : {id:'home',label:'Home',icon:'home',hash:'#home'};
+  const tabs=[ first,
+    {id:'customers',label:'Customers',icon:'users',hash:'#customers'},
+    {id:'orders',label:'Orders',icon:'shopping-bag',hash:'#orders'},
+    {id:'pay',label:'Pay',icon:'dollar-sign',hash:'#payments'},
+    {id:'reports',label:'Reports',icon:'bar-chart-2',hash:'#reports'},
+  ];
+  const activeMap={home:'home',route:'route',customers:'customers',orders:'orders',payments:'pay',reports:'reports'};
+  const active=activeMap[base]||'';
+  nav.innerHTML = tabs.map(t=>`<button class="${active===t.id?'active':''}" onclick="location.hash='${t.hash}'">
+    <i data-lucide="${t.icon}" style="width:22px;height:22px"></i><span>${t.label}</span></button>`).join('');
+  icons();
+}
+
+window.addEventListener('hashchange', render);
+/* ===================== HOME ===================== */
+function greeting(){ const h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
+const ALERTS = [
+  {id:'al1',level:'HIGH',text:'Corner Deli & Grocery is over 90% of credit limit',linkTo:'#customers/cu2'},
+  {id:'al2',level:'HIGH',text:'2 overdue invoices need collection',linkTo:'#reports'},
+  {id:'al3',level:'MEDIUM',text:'Maple Street Bakery is on hold',linkTo:'#customers/cu6'},
+];
+let homeAlertsOpen=false;
+route('home',{ root:true, title:()=>`${greeting()}, ${me().firstName}`,
+  headerRight:()=>`${bellBtn()}<button class="iconbtn" onclick="location.hash='#settings'"><i data-lucide="settings"></i></button>`,
+  render:()=>{
+    const casesToday=ORDERS.filter(o=>o.deliveryDate===todayISO()).reduce((s,o)=>s+o.totalCases,0);
+    const openOrders=ORDERS.filter(o=>['Submitted','Picking'].includes(o.status)).length;
+    const delivToday=ORDERS.filter(o=>o.deliveryDate===todayISO()).length;
+    const alertCount=ALERTS.length;
+    const kpi=(emoji,label,val,onclick,danger)=>`<div class="card row-link" ${onclick?`onclick="${onclick}"`:''} style="${danger?'background:#fce8e6;':''}cursor:pointer">
+      <div style="font-size:1.4rem">${emoji}</div>
+      <div style="font-size:1.5rem;font-weight:600;${danger?'color:var(--danger)':''}">${val}</div>
+      <div class="sec" style="font-size:.8rem">${label}</div></div>`;
+    const qa=(emoji,label,hash)=>`<button class="card row-link" onclick="location.hash='${hash}'" style="text-align:left;border:none;cursor:pointer">
+      <div style="font-size:1.3rem">${emoji}</div><div style="font-weight:500;margin-top:4px">${label}</div></button>`;
+    return `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      ${kpi('📦','Cases Today',casesToday,'')}
+      ${kpi('📋','Open Orders',openOrders,"location.hash='#orders'")}
+      ${kpi('🚚','Deliveries Today',delivToday,'')}
+      ${kpi('⚠️','Alerts',alertCount,"toggleHomeAlerts()",alertCount>0)}
+    </div>
+    ${homeAlertsOpen?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+      ${ALERTS.map(a=>`<div class="card row-link" onclick="location.hash='${a.linkTo}'" style="display:flex;align-items:center;gap:10px;border-left:3px solid ${a.level==='HIGH'?'var(--danger)':'#f59e0b'};cursor:pointer">
+        <span>⚠️</span><span style="flex:1;font-size:.875rem">${esc(a.text)}</span><i data-lucide="chevron-right" class="muted"></i></div>`).join('')}
+    </div>`:''}
+    <h3 style="font-size:1.125rem;font-weight:500;margin:20px 0 8px">Quick Actions</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      ${qa('➕','New Order','#orders/new')}
+      ${qa('👥','Customers','#customers')}
+      ${qa('📋','My Orders','#orders')}
+      ${qa('💰','Collect Payment','#payments')}
+    </div>
+    <h3 style="font-size:1.125rem;font-weight:500;margin:20px 0 8px">Recent Activity</h3>
+    <div class="card divide" style="padding:0">
+      ${RECENT_ACTIVITY.slice(0,8).map(a=>`<div class="row-link" onclick="location.hash='${a.linkTo}'" style="padding:12px 16px;display:flex;gap:10px;align-items:center;cursor:pointer">
+        <span>${a.type==='order'?'🧾':a.type==='payment'?'💵':'🚚'}</span>
+        <div style="flex:1"><div style="font-size:.875rem">${esc(a.text)}</div>
+        <div class="muted" style="font-size:.75rem">${fmtDT(a.date)}</div></div>
+        <i data-lucide="chevron-right" class="muted"></i></div>`).join('')}
+    </div>`;
+  }
+});
+function toggleHomeAlerts(){ homeAlertsOpen=!homeAlertsOpen; render(); }
+/* ===================== CUSTOMERS LIST ===================== */
+const custFilter={q:'',chip:'All'};
+function custMatchesChip(c){
+  switch(custFilter.chip){
+    case 'Active': return c.status==='Active';
+    case 'Hold': return c.status==='Hold';
+    case 'Overdue': return INVOICES.some(i=>i.customerId===c.id && i.status==='Overdue');
+    case 'Prepaid': return c.paymentType==='prepaid';
+    case 'Credit': return c.paymentType==='credit';
+    default: return true;
+  }
+}
+route('customers',{ root:true, title:'Customers',
+  headerRight:()=>`<button class="iconbtn" onclick="openAddCustomer()" title="Add Customer"><i data-lucide="user-plus"></i></button>`,
+  render:()=>{
+    const chips=['All','Active','Hold','Overdue','Prepaid','Credit'];
+    let list=CUSTOMERS.filter(custMatchesChip).filter(c=>{
+      const q=custFilter.q.toLowerCase(); if(!q) return true;
+      return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q);
+    }).sort((a,b)=>a.name.localeCompare(b.name));
+    // Driver de-emphasis
+    const stopCustIds=new Set(ROUTE_STOPS.map(s=>ORD(s.orderId).customerId));
+    return `
+    <input class="inp" placeholder="Search customers..." value="${esc(custFilter.q)}" oninput="custFilter.q=this.value;rerenderList()" />
+    <div class="chips" style="margin-top:12px">${chips.map(ch=>`<button class="chip ${custFilter.chip===ch?'active':''}" onclick="custFilter.chip='${ch}';render()">${ch}</button>`).join('')}</div>
+    <div id="custList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+      ${list.length?list.map(c=>custRow(c, state.role==='Driver'&&!stopCustIds.has(c.id))).join(''):empty('users','No customers','No customers match your filters.')}
+    </div>`;
+  }
+});
+function rerenderList(){
+  const q=custFilter.q.toLowerCase();
+  let list=CUSTOMERS.filter(custMatchesChip).filter(c=>!q||c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  const stopCustIds=new Set(ROUTE_STOPS.map(s=>ORD(s.orderId).customerId));
+  const el=$('#custList'); if(el){ el.innerHTML=list.length?list.map(c=>custRow(c,state.role==='Driver'&&!stopCustIds.has(c.id))).join(''):empty('users','No customers','No customers match your filters.'); icons(); }
+}
+function custRow(c, dim){
+  const owes=c.balance>0;
+  const parent=c.isBranch?CUST(c.parentId):null;
+  return `<div class="card" style="display:flex;gap:10px;${dim?'opacity:.45':''}">
+    <div class="row-link" style="flex:1;cursor:pointer" onclick="location.hash='#customers/${c.id}'">
+      <div style="font-weight:600">${esc(c.name)}</div>
+      <div style="margin-top:4px">${statusBadge(c.status)}
+        ${c.isBranch?`<span class="badge" style="background:#f1f3f4;color:#5f6368;margin-left:4px"><i data-lucide="git-branch" style="width:12px;height:12px;margin-right:3px"></i>Branch</span>`:''}</div>
+      ${c.isBranch?`<div class="muted" style="font-size:.75rem;margin-top:3px">Account: ${esc(parent?parent.name:'')}</div>`:''}
+      <div class="muted" style="font-size:.75rem;margin-top:4px">Last order: ${fmtDate(c.lastOrderDate)}</div>
+    </div>
+    <div style="text-align:right;min-width:110px">
+      <div style="font-weight:700;font-size:1.05rem;color:${owes?'var(--danger)':'var(--success)'}">${money(c.balance)}</div>
+      ${creditBar(c.balance,c.creditLimit)}
+      <button class="btn btn-secondary" style="margin-top:8px;padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();startNewOrder('${c.id}')">New Order →</button>
+    </div>
+  </div>`;
+}
+function openAddCustomer(){
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0;font-size:1.125rem;font-weight:600">Add Customer</h3>
+    <button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <input class="inp" placeholder="Business name" id="ncName"/>
+      <input class="inp" placeholder="Contact name"/>
+      <input class="inp" placeholder="Phone"/>
+      <input class="inp" placeholder="Email"/>
+      <input class="inp" placeholder="Address"/>
+      <button class="btn btn-primary btn-full btn-lg" onclick="closeOverlay();toast('Customer added (mock)')">Save Customer</button>
+    </div>`);
+}
+/* ===================== CUSTOMER PROFILE ===================== */
+let profileTab='Overview';
+route('customers/:id',{}); // placeholder; real handling via 'customers' base with id
+// Override: when base customers has id, dispatch to profile
+const _customersRender = ROUTES['customers'].render;
+ROUTES['customers'].render = (ctx)=> ctx.id ? customerProfile(ctx.id) : _customersRender(ctx);
+const _customersTitle = ROUTES['customers'].title;
+ROUTES['customers'].title = (ctx)=> ctx.id ? (CUST(ctx.id)?CUST(ctx.id).name:'Customer') : 'Customers';
+ROUTES['customers'].headerRight = (ctx)=> ctx.id ? '' : `<button class="iconbtn" onclick="openAddCustomer()" title="Add Customer"><i data-lucide="user-plus"></i></button>`;
+ROUTES['customers'].root = false; // back button appears when id present; for list root we special-case
+const _origRenderHeader = renderHeader;
+renderHeader = function(cfg, ctx){
+  // root for customers list only when no id
+  const isCustList = parseHash().base==='customers' && !ctx.id;
+  const cfg2 = Object.assign({}, cfg, {root: cfg.root || isCustList});
+  _origRenderHeader(cfg2, ctx);
+};
+
+function customerProfile(id){
+  const c=CUST(id); if(!c) return empty('user','Customer not found','');
+  const parent=c.isBranch?CUST(c.parentId):null;
+  const tabs=[['Overview','user'],['Orders','shopping-bag'],['Invoices','file-text'],['Payments','wallet'],['Account','credit-card'],['Branches','git-branch'],['Notes','sticky-note']]
+    .filter(t=>!(t[0]==='Branches'&&c.isBranch));
+  if(profileTab==='Branches'&&c.isBranch) profileTab='Overview';
+  const crumb = c.isBranch
+    ? `<span class="row-link" onclick="location.hash='#customers'">Customers</span> › <span class="row-link" onclick="location.hash='#customers/${parent.id}'">${esc(parent.name)}</span> › ${esc(c.name)}`
+    : `<span class="row-link" onclick="location.hash='#customers'">Customers</span> › ${esc(c.name)}`;
+  const action=(emoji,label,onclick)=>`<button class="btn btn-secondary" style="flex-direction:column;gap:2px;min-width:64px;padding:8px;font-size:.7rem" onclick="${onclick}"><span style="font-size:1.1rem">${emoji}</span>${label}</button>`;
+  return `
+  <div class="muted" style="font-size:.75rem;margin-bottom:8px">${crumb}</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">${statusBadge(c.status)}<span class="muted" style="font-size:.8rem">${esc(c.type)}</span></div>
+  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px">
+    ${action('➕','New Order',`startNewOrder('${c.id}')`)}
+    ${action('💲','Payment',`startPayment('${c.id}')`)}
+    ${action('✉️','Message',`openSendMessage('${c.id}')`)}
+    ${action('📞','Call',`location.href='tel:${c.phone}'`)}
+    ${action('✏️','Edit',`toast('Edit customer (mock)')`)}
+  </div>
+  <div class="chips" style="margin:12px 0;border-bottom:1px solid var(--border)">
+    ${tabs.map(t=>`<button onclick="profileTab='${t[0]}';render()" style="background:none;border:none;padding:8px 10px;font-size:.85rem;cursor:pointer;border-bottom:2px solid ${profileTab===t[0]?'var(--primary)':'transparent'};color:${profileTab===t[0]?'var(--primary)':'var(--text-secondary)'};font-weight:${profileTab===t[0]?600:400}">${t[0]}</button>`).join('')}
+  </div>
+  <div>${profileTabBody(c)}</div>`;
+}
+function profileTabBody(c){
+  if(profileTab==='Overview') return overviewTab(c);
+  if(profileTab==='Orders'){ const list=ORDERS.filter(o=>o.customerId===c.id).sort((a,b)=>b.createdDate.localeCompare(a.createdDate));
+    return list.length?list.map(o=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#orders/${o.id}'">
+      <div style="display:flex;justify-content:space-between"><span class="mono" style="font-weight:600">${o.orderNumber}</span>${statusBadge(o.status)}</div>
+      <div class="muted" style="font-size:.8rem;margin-top:4px">${fmtDate(o.createdDate)} · ${o.totalCases} cases · ${money(o.grandTotal)}</div></div>`).join(''):empty('shopping-bag','No orders yet','');
+  }
+  if(profileTab==='Invoices'){ const list=INVOICES.filter(i=>i.customerId===c.id);
+    return list.length?list.map(i=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#orders'">
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-weight:600">${i.invoiceNumber}</span>${statusBadge(i.status)}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span class="muted" style="font-size:.8rem">Due ${fmtDate(i.dueDate)} · ${money(i.amountDue)} due</span>
+        <button class="iconbtn" onclick="event.stopPropagation();toast('Invoice emailed to '+'${esc(c.email)}')"><i data-lucide="mail"></i></button></div></div>`).join(''):empty('file-text','No invoices','');
+  }
+  if(profileTab==='Payments') return paymentsTab(c);
+  if(profileTab==='Account') return accountTab(c);
+  if(profileTab==='Branches'){ const branches=CUSTOMERS.filter(b=>b.parentId===c.id);
+    return `${branches.length?branches.map(b=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#customers/${b.id}'">
+      <div style="font-weight:600">${esc(b.name)}</div><div class="muted" style="font-size:.8rem">${esc(b.address)}</div></div>`).join(''):empty('git-branch','No branch locations yet','')}
+      <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="openAddBranch('${c.id}')"><i data-lucide="plus"></i>Add Branch</button>`;
+  }
+  if(profileTab==='Notes') return notesTab(c);
+  return '';
+}
+function overviewTab(c){
+  const avail=c.creditLimit-c.balance; const pct=c.creditLimit?Math.round(c.balance/c.creditLimit*100):0;
+  const recentOrders=ORDERS.filter(o=>o.customerId===c.id).sort((a,b)=>b.createdDate.localeCompare(a.createdDate)).slice(0,3);
+  const openInv=INVOICES.filter(i=>i.customerId===c.id&&i.status!=='Paid').sort((a,b)=>a.dueDate.localeCompare(b.dueDate)).slice(0,3);
+  const infoRow=(k,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.875rem"><span class="muted">${k}</span><span style="text-align:right">${v}</span></div>`;
+  return `
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+    <div class="card"><div class="muted" style="font-size:.75rem">Balance</div><div style="font-size:1.3rem;font-weight:700;color:${c.balance>0?'var(--danger)':'var(--success)'}">${money(c.balance)}</div></div>
+    ${c.paymentType==='credit'?`<div class="card"><div class="muted" style="font-size:.75rem">Credit Limit</div><div style="font-size:1.3rem;font-weight:700">${money(c.creditLimit)}</div></div>`:''}
+    ${c.accountCredit>0?`<div class="card"><div class="muted" style="font-size:.75rem">Unapplied Credit</div><div style="font-size:1.3rem;font-weight:700;color:var(--success)">${money(c.accountCredit)}</div></div>`:''}
+  </div>
+  ${c.paymentType==='credit'?`<div class="card" style="margin-top:10px">
+    <div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Credit Usage</div>${creditBar(c.balance,c.creditLimit)}
+    <div class="muted" style="font-size:.75rem;margin-top:4px">${pct}% used · ${money(avail)} available</div>
+    <form onsubmit="reduceCredit(event,'${c.id}')" style="display:flex;gap:8px;margin-top:10px">
+      <input class="inp" type="number" id="redLimit" placeholder="New lower limit" max="${c.creditLimit}" step="100"/>
+      <button class="btn btn-secondary">Reduce</button></form></div>`:''}
+  <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:6px">Contact Info</div>
+    ${infoRow('Contact',esc(c.contact))}
+    ${infoRow('Phone',`<a href="tel:${c.phone}" style="color:var(--primary)">${esc(c.phone)}</a>`)}
+    ${infoRow('Email',esc(c.email))}
+    ${infoRow('Address',`<a href="${mapsLink(c.address)}" target="_blank" style="color:var(--primary)">${esc(c.address)}</a>`)}
+  </div>
+  <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:6px">Account Info</div>
+    ${infoRow('Type',esc(c.type))}
+    ${infoRow('Payment',c.paymentType==='credit'?statusBadge('Open').replace('Open','Credit'):`<span class="badge" style="background:#fef7e0;color:#b06000">Prepaid</span>`)}
+    ${infoRow('Terms',esc(c.terms))}
+    ${infoRow('Price Level',esc(c.priceLevel))}
+    ${infoRow('Salesperson',esc((USERS.find(u=>u.id===c.assignedSalesperson)||{}).name||'—'))}
+    ${infoRow('Route',esc(c.route))}
+  </div>
+  ${recentOrders.length?`<div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:6px">Recent Orders</div>
+    ${recentOrders.map(o=>`<div class="row-link" style="display:flex;justify-content:space-between;padding:6px 0;cursor:pointer" onclick="location.hash='#orders/${o.id}'"><span class="mono" style="font-size:.85rem">${o.orderNumber}</span><span style="font-size:.85rem">${money(o.grandTotal)}</span></div>`).join('')}</div>`:''}
+  ${openInv.length?`<div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:6px">Open Invoices</div>
+    ${openInv.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem"><span class="mono">${i.invoiceNumber}</span><span>${money(i.amountDue)} · due ${fmtDate(i.dueDate)}</span></div>`).join('')}</div>`:''}`;
+}
+function reduceCredit(e,id){ e.preventDefault(); const c=CUST(id); const v=parseFloat($('#redLimit').value);
+  if(isNaN(v)||v>=c.creditLimit){ toast('New limit must be lower','error'); return; } c.creditLimit=v; toast('Credit limit reduced'); render(); }
+function paymentsTab(c){
+  const pays=PAYMENTS.filter(p=>p.customerId===c.id).sort((a,b)=>b.date.localeCompare(a.date));
+  const links=PAYMENT_LINKS.filter(p=>p.customerId===c.id&&p.status!=='paid');
+  let html='';
+  if(links.length) html+=`<div style="margin-bottom:10px">${links.map(l=>`<div class="card" style="margin-bottom:8px;border-left:3px solid var(--primary)">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.85rem">🔗 Payment Link · ${money(l.amount)}</span>${statusBadge(l.status)}</div>
+    <div class="muted" style="font-size:.75rem;margin-top:3px">${esc(l.allocation)} · ${l.channel} · sent ${fmtDate(l.sentAt)}</div></div>`).join('')}</div>`;
+  html+= pays.length?pays.map(p=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="openPaymentDetail('${p.id}')">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:1.1rem;font-weight:700">${money(p.amount)}</span><span class="muted" style="font-size:.8rem">${p.method}</span></div>
+    <div class="muted" style="font-size:.75rem;margin-top:3px">${fmtDT(p.date)}${p.reference?' · Ref: #'+esc(p.reference):''}</div>
+    ${p.appliedTo.length?`<div class="muted" style="font-size:.75rem">Applied to: ${p.appliedTo.map(a=>INV(a.invoiceId)?INV(a.invoiceId).invoiceNumber:'—').join(', ')}</div>`:`<div class="muted" style="font-size:.75rem">Unapplied: ${money(p.unappliedAmount)}</div>`}
+    <button class="btn btn-secondary" style="margin-top:6px;padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();toast('Receipt emailed')">🖨 Email Receipt</button></div>`).join(''):(links.length?'':empty('wallet','No payments',''));
+  return html;
+}
+function openPaymentDetail(id){ const p=PAYMENTS.find(x=>x.id===id); const c=CUST(p.customerId);
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Payment Detail</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div style="text-align:center;margin:12px 0"><div style="font-size:2rem;font-weight:700">${money(p.amount)}</div><div class="muted">${p.method}${p.reference?' · #'+esc(p.reference):''}</div></div>
+    <div class="card">${['Customer:'+c.name,'Date: '+fmtDT(p.date),'Collected by: '+((USERS.find(u=>u.id===p.collectedBy)||{}).name||'')].map(x=>`<div style="padding:4px 0;font-size:.875rem">${esc(x)}</div>`).join('')}</div>
+    <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="printStandin('Payment Receipt')"><i data-lucide="printer"></i>Print</button>`);
+}
+function accountTab(c){
+  const row=(k,v)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.875rem"><span class="muted">${k}</span><span>${v}</span></div>`;
+  const cards=c.savedPaymentMethods.filter(m=>m.type==='credit_card');
+  const banks=c.savedPaymentMethods.filter(m=>m.type==='ach');
+  const pmRow=(m,icon)=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0">
+    <i data-lucide="${icon}"></i><div style="flex:1"><div style="font-size:.875rem">${esc(m.brand)} ••••${m.last4}${m.expiry?' · Exp '+m.expiry:''}</div></div>
+    ${m.isDefault?`<span class="badge sm" style="background:#e6f4ea;color:#1e7e34">Default</span>`:`<button class="iconbtn" title="Set Default" onclick="setDefaultPM('${c.id}','${m.id}')">⭐</button>`}
+    <button class="iconbtn" title="Remove" onclick="removePM('${c.id}','${m.id}')"><i data-lucide="trash-2"></i></button></div>`;
+  return `<div class="card"><div style="font-weight:600;margin-bottom:4px">Account Details</div>
+    ${row('Type',esc(c.type))}${row('Payment',esc(c.paymentType))}${row('Terms',esc(c.terms))}
+    ${row('Credit Tier',c.creditTier||'—')}${row('Credit Limit',money(c.creditLimit))}${row('Price Level',c.priceLevel)}
+    ${row('Salesperson',esc((USERS.find(u=>u.id===c.assignedSalesperson)||{}).name||'—'))}</div>
+  <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:4px">Payment Methods on File</div>
+    <div class="muted" style="font-size:.75rem;margin-top:6px">Credit Cards</div>
+    ${cards.length?cards.map(m=>pmRow(m,'credit-card')).join(''):'<div class="muted" style="font-size:.8rem;padding:6px 0">None</div>'}
+    <div class="muted" style="font-size:.75rem;margin-top:6px">Bank Accounts (ACH)</div>
+    ${banks.length?banks.map(m=>pmRow(m,'building-2')).join(''):'<div class="muted" style="font-size:.8rem;padding:6px 0">None</div>'}
+    <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="openAddPM('${c.id}')"><i data-lucide="plus"></i>Add Payment Method</button>
+    ${(!cards.length)?`<button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="location.hash='#payment_links'">No saved card? Send a payment link</button>`:''}
+  </div>
+  <button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="openSendMessage('${c.id}',true)"><i data-lucide="send"></i>Send Statement</button>`;
+}
+function setDefaultPM(cid,mid){ const c=CUST(cid); c.savedPaymentMethods.forEach(m=>m.isDefault=(m.id===mid)); toast('Default updated'); render(); }
+function removePM(cid,mid){ const c=CUST(cid); c.savedPaymentMethods=c.savedPaymentMethods.filter(m=>m.id!==mid); toast('Payment method removed'); render(); }
+function openAddPM(cid){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Add Payment Method</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <button class="btn btn-secondary btn-full" style="margin-bottom:8px" onclick="addPM('${cid}','credit_card')">💳 Add Card (Mock)</button>
+  <button class="btn btn-secondary btn-full" style="margin-bottom:8px" onclick="addPM('${cid}','ach')">🏦 Add Bank (Mock)</button>
+  <button class="btn btn-secondary btn-full" onclick="closeOverlay()">Cancel</button>`); }
+function addPM(cid,type){ const c=CUST(cid); const isCard=type==='credit_card';
+  c.savedPaymentMethods.push({id:uid('pm'),type,last4:String(Math.floor(1000+Math.random()*9000)),brand:isCard?'Visa':'Chase',expiry:isCard?'10/28':'',isDefault:c.savedPaymentMethods.length===0});
+  closeOverlay(); toast(isCard?'Card added':'Bank added'); render(); }
+function notesTab(c){
+  return `<div class="card"><textarea class="inp" rows="2" id="noteInput" placeholder="Add a note..." oninput="$('#noteSave').disabled=!this.value.trim()"></textarea>
+    <button class="btn btn-primary" id="noteSave" disabled style="margin-top:8px" onclick="saveNote('${c.id}')">Save</button></div>
+    <div style="margin-top:10px">${c.notes.length?c.notes.slice().reverse().map(n=>`<div class="card" style="margin-bottom:8px"><div style="font-size:.875rem">${esc(n.text)}</div><div class="muted" style="font-size:.72rem;margin-top:4px">${fmtDT(n.date)}</div></div>`).join(''):empty('sticky-note','No notes','')}</div>`;
+}
+function saveNote(id){ const c=CUST(id); const v=$('#noteInput').value.trim(); if(!v)return; c.notes.push({text:v,date:new Date().toISOString()}); toast('Note saved'); render(); }
+function openAddBranch(id){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Add Branch</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="display:flex;flex-direction:column;gap:10px"><input class="inp" placeholder="Branch name"/><input class="inp" placeholder="Contact"/><input class="inp" placeholder="Phone"/><input class="inp" placeholder="Email"/><input class="inp" placeholder="Address"/>
+  <div style="display:flex;gap:8px"><button class="btn btn-secondary btn-full" onclick="closeOverlay()">Cancel</button><button class="btn btn-primary btn-full" onclick="closeOverlay();toast('Branch added (mock)')">Save</button></div></div>`); }
+function openSendMessage(id,statement){ const c=CUST(id);
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">${statement?'Send Statement':'Send Message'}</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <input class="inp" value="${esc(c.email)}"/>
+    <input class="inp" value="${statement?'Account Statement — '+esc(c.name):''}" placeholder="Subject"/>
+    <textarea class="inp" rows="4" placeholder="Message">${statement?'Please find your current account statement attached. Balance due: '+money(c.balance)+'.':''}</textarea>
+    ${statement?'<div class="muted" style="font-size:.8rem">📎 statement.pdf attached</div>':''}
+    <button class="btn btn-primary btn-full" onclick="closeOverlay();toast('Message sent to ${esc(c.name)}')">Send</button></div>`); }
+/* ===================== ORDERS LIST ===================== */
+const orderFilter={q:'',chip:'All'};
+route('orders',{ root:true, title:'Orders',
+  headerRight:()=>`<button class="iconbtn" onclick="location.hash='#returns/new'" title="New Return" style="background:#fce8e6;color:#c5221f"><i data-lucide="rotate-ccw"></i></button>`,
+  render:(ctx)=> ctx.id ? orderDetail(ctx.id) : ordersList()
+});
+const _ordersTitle='Orders';
+ROUTES['orders'].title=(ctx)=> ctx.id ? (ORD(ctx.id)?ORD(ctx.id).orderNumber:'Order') : 'Orders';
+ROUTES['orders'].headerRight=(ctx)=> ctx.id ? orderDetailMenuBtn(ctx.id) : `<button class="iconbtn" onclick="location.hash='#returns/new'" title="New Return" style="background:#fce8e6;color:#c5221f"><i data-lucide="rotate-ccw"></i></button>`;
+ROUTES['orders'].root=false;
+ROUTES['orders'].hideFab=false;
+function ordersIsRoot(ctx){ return !ctx.id; }
+// adjust header root for orders list
+const _rh2=renderHeader;
+renderHeader=function(cfg,ctx){ const b=parseHash().base; const isListRoot=(b==='orders'&&!ctx.id)||(b==='customers'&&!ctx.id);
+  _rh2(Object.assign({},cfg,{root:cfg.root||isListRoot}),ctx); };
+
+function ordersList(){
+  const chips=['All','Submitted','Picking','Out for delivery','Delivered','Cancelled','Returns'];
+  if(orderFilter.chip==='Returns'){
+    const rs=RETURNS.slice().sort((a,b)=>b.createdDate.localeCompare(a.createdDate));
+    return filterBarOrders()+ (rs.length?rs.map(returnRow).join(''):empty('file-text','No returns',''));
+  }
+  let list=ORDERS.filter(o=>{
+    if(orderFilter.chip==='All')return true;
+    if(orderFilter.chip==='Out for delivery')return o.status==='Picking';
+    return o.status===orderFilter.chip;
+  }).filter(o=>{ const q=orderFilter.q.toLowerCase(); if(!q)return true;
+    return o.orderNumber.toLowerCase().includes(q)||CUST(o.customerId).name.toLowerCase().includes(q);
+  }).sort((a,b)=>b.createdDate.localeCompare(a.createdDate));
+  return filterBarOrders()+`<div style="display:flex;flex-direction:column;gap:10px">${list.length?list.map(orderRow).join(''):empty('file-text','No orders','No orders match your filters.')}</div>`;
+}
+function filterBarOrders(){ const chips=['All','Submitted','Picking','Out for delivery','Delivered','Cancelled','Returns'];
+  return `<input class="inp" placeholder="Search orders..." value="${esc(orderFilter.q)}" oninput="orderFilter.q=this.value;render()"/>
+  <div class="chips" style="margin:12px 0">${chips.map(ch=>`<button class="chip ${orderFilter.chip===ch?'active':''}" onclick="orderFilter.chip='${ch}';render()">${ch}</button>`).join('')}</div>`; }
+function orderRow(o){ const c=CUST(o.customerId);
+  return `<div class="card row-link" style="display:flex;gap:10px;cursor:pointer" onclick="location.hash='#orders/${o.id}'">
+    <div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-weight:600">${o.orderNumber}</span></div>
+      <div style="margin-top:4px">${statusBadge(o.status==='Picking'?'Picking':o.status)}</div>
+      <div class="muted" style="font-size:.78rem;margin-top:4px">${esc(c.name)} · ${fmtDate(o.createdDate)}</div></div>
+    <div style="text-align:right"><div class="muted" style="font-size:.78rem">${o.totalCases} cases</div><div style="font-weight:700">${money(o.grandTotal)}</div></div></div>`;
+}
+function returnRow(r){ const c=CUST(r.customerId);
+  return `<div class="card row-link" style="border-left:3px solid var(--danger);cursor:pointer;margin-bottom:10px" onclick="location.hash='#returns/${r.id}'">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-weight:600">${r.returnNumber}</span>
+      <span class="badge" style="background:#fce8e6;color:#c5221f">Return ${r.status}</span></div>
+    <div class="muted" style="font-size:.78rem;margin-top:4px">${esc(c.name)} · ${fmtDate(r.createdDate)} · ${money(r.grandTotal)} credit</div></div>`;
+}
+/* ===================== ORDER DETAIL ===================== */
+const ORDER_STEPS=['Draft','Submitted','Picking','Delivered'];
+function statusTimeline(status){
+  if(status==='Cancelled') return `<div class="card" style="background:#fce8e6;color:#c5221f;text-align:center;font-weight:600">Order Cancelled</div>`;
+  const idx=ORDER_STEPS.indexOf(status);
+  return `<div class="card"><div style="display:flex;align-items:center;position:relative">
+    ${ORDER_STEPS.map((s,i)=>{const done=i<=idx;return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1">
+      <div style="width:24px;height:24px;border-radius:999px;background:${done?'var(--primary)':'#e0e0e0'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.8rem">${done?'✓':i+1}</div>
+      <div class="timeline-label" style="margin-top:4px;color:${done?'var(--primary)':'var(--text-muted)'}">${s}</div></div>`;}).join('')}
+    <div style="position:absolute;top:11px;left:12%;right:12%;height:3px;background:#e0e0e0;z-index:0"><div style="height:100%;width:${idx<=0?0:(idx/(ORDER_STEPS.length-1))*100}%;background:var(--primary)"></div></div>
+  </div></div>`;
+}
+let orderEditMode=false;
+function orderDetailMenuBtn(id){ return `<button class="iconbtn" onclick="openOrderMenu('${id}')"><i data-lucide="more-vertical"></i></button>`; }
+function orderDetail(id){
+  const o=ORD(id); if(!o) return empty('shopping-bag','Order not found','');
+  const c=CUST(o.customerId); const locked=['Picking','Delivered'].includes(o.status);
+  const editable=['Draft','Submitted'].includes(o.status)&&orderEditMode;
+  return `${statusTimeline(o.status)}
+  ${locked?`<div class="card" style="margin-top:10px;background:#fef7e0;color:#b06000;font-size:.85rem">🔒 Order is locked — editing and cancellation are disabled once picking begins.</div>`:''}
+  ${orderReceipt(o,{editable,context:'order'})}
+  ${editable?`<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary btn-full" onclick="orderEditMode=false;render()">Cancel</button><button class="btn btn-primary btn-full" onclick="saveOrderEdits('${o.id}')">Save Changes</button></div>`:''}`;
+}
+function orderReceipt(o,opts){
+  opts=opts||{}; const c=CUST(o.customerId); const bill=billCust(c); const editable=opts.editable;
+  const sp=USERS.find(u=>u.id===o.salespersonId);
+  const lineRows=o.lineItems.map(l=>{
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td class="mono" style="padding:6px 4px;font-size:.75rem">${l.productCode}</td>
+      <td style="padding:6px 4px;font-size:.8rem">${esc(l.productName)}</td>
+      <td style="padding:6px 4px;text-align:center">${editable?`<div style="display:flex;align-items:center;gap:4px;justify-content:center"><button class="iconbtn" style="width:24px;height:24px" onclick="editLineQty('${o.id}','${l.lineId}',-1)">−</button><span class="mono">${l.quantity}</span><button class="iconbtn" style="width:24px;height:24px" onclick="editLineQty('${o.id}','${l.lineId}',1)">+</button></div>`:`<span class="mono">${l.quantity}</span>`}</td>
+      <td class="mono" style="padding:6px 4px;text-align:right;font-size:.8rem">${money(l.casePrice-l.discount)}</td>
+      <td class="mono" style="padding:6px 4px;text-align:right;font-weight:600;font-size:.8rem">${money(l.lineTotal)}</td>
+      ${editable?`<td style="padding:6px 4px;text-align:center"><button class="iconbtn" style="width:24px;height:24px" onclick="removeLine('${o.id}','${l.lineId}')"><i data-lucide="trash-2" style="width:14px;height:14px"></i></button></td>`:''}</tr>`;
+  }).join('');
+  return `<div class="card" style="margin-top:10px">
+    <div class="row-link" style="cursor:pointer" onclick="location.hash='#customers/${c.id}'">
+      <div style="font-weight:600">${esc(c.name)}</div>
+      <div class="muted" style="font-size:.78rem">${c.code} · ${esc(c.type)}${c.isBranch?' · Branch (bill to '+esc(bill.name)+')':''}</div>
+      <div class="muted" style="font-size:.78rem">Placed ${fmtDate(o.createdDate)} · Delivery ${fmtDate(o.deliveryDate)} · ${esc(sp?sp.name:'')}</div></div>
+    <table style="width:100%;margin-top:10px;border-collapse:collapse">
+      <thead><tr style="color:var(--text-muted);font-size:.7rem;text-align:left"><th style="padding:4px">Code</th><th style="padding:4px">Product</th><th style="padding:4px;text-align:center">Qty</th><th style="padding:4px;text-align:right">Unit Price</th><th style="padding:4px;text-align:right">Total</th>${editable?'<th></th>':''}</tr></thead>
+      <tbody>${lineRows}</tbody></table>
+    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+      ${totRow('Subtotal',o.subtotal)}${totRow('Deposits',o.depositTotal)}${totRow('Discounts',-o.discountTotal)}
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.1rem;color:var(--primary);margin-top:4px"><span>Grand Total</span><span>${money(o.grandTotal)}</span></div>
+      <div class="muted" style="font-size:.78rem;text-align:right">Total Cases: ${o.totalCases}</div></div>
+    ${editable?`<textarea class="inp" rows="2" id="ordNotes" style="margin-top:8px" placeholder="Notes...">${esc(o.notes)}</textarea>`:(o.notes?`<div class="muted" style="font-size:.8rem;margin-top:8px">📝 ${esc(o.notes)}</div>`:'')}
+  </div>`;
+}
+function totRow(label,val){ return `<div style="display:flex;justify-content:space-between;font-size:.85rem;padding:2px 0"><span class="muted">${label}</span><span class="mono">${money(val)}</span></div>`; }
+function editLineQty(oid,lid,delta){ const o=ORD(oid); const l=o.lineItems.find(x=>x.lineId===lid); if(!l)return;
+  l.quantity=Math.max(1,l.quantity+delta); recalcOrder(o); render(); }
+function removeLine(oid,lid){ const o=ORD(oid); o.lineItems=o.lineItems.filter(x=>x.lineId!==lid); recalcOrder(o); render(); }
+function recalcOrder(o){ o.lineItems.forEach(l=>{l.lineTotal=(l.casePrice-l.discount)*l.quantity;l.depositTotal=l.depositPerCase*l.quantity;});
+  Object.assign(o,rollup(o.lineItems,o.orderDiscount||0)); }
+function saveOrderEdits(id){ const o=ORD(id); if($('#ordNotes'))o.notes=$('#ordNotes').value; o.modifiedDate=new Date().toISOString(); orderEditMode=false; toast('Order updated'); render(); }
+function openOrderMenu(id){ const o=ORD(id); const isDS=['Draft','Submitted'].includes(o.status);
+  const item=(label,onclick,danger)=>`<button class="btn ${danger?'btn-danger':'btn-secondary'} btn-full" style="margin-bottom:8px;justify-content:flex-start" onclick="closeOverlay();${onclick}">${label}</button>`;
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Order Actions</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    ${isDS?item('✏️ Edit Order',`orderEditMode=true;render()`):''}
+    ${item('📄 Duplicate Order',`duplicateOrder('${id}')`)}
+    ${item('🖨 Print',`printStandin('Order ${o.orderNumber}')`)}
+    ${item('✉️ Send Email',`toast('Order emailed')`)}
+    ${o.status==='Delivered'?item('↩️ Create Return',`startReturnFromOrder('${id}')`):''}
+    ${isDS?item('🚫 Cancel Order',`cancelOrder('${id}')`,true):''}`);
+}
+function duplicateOrder(id){ const o=ORD(id); const n=makeOrder({id:uid('o'),orderNumber:nextOrderNumber(),customerId:o.customerId,salespersonId:CURRENT_USER_ID,status:'Draft',lineItems:o.lineItems.map(l=>Object.assign({},l,{lineId:uid('ln')})),deliveryDate:nextWorkingDay(),notes:'',createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString()});
+  ORDERS.unshift(n); toast('Order duplicated'); location.hash='#orders/'+n.id; }
+function cancelOrder(id){ confirmDialog('Cancel Order','This order will be cancelled. Continue?',()=>{ const o=ORD(id); o.status='Cancelled'; toast('Order cancelled','warning'); render(); },'Cancel Order',true); }
+function printStandin(label){ openDialog(`<h3 style="margin:0 0 8px">Print Preview</h3><div class="card" style="background:#f8f9fa;text-align:center;padding:24px"><i data-lucide="printer" style="width:32px;height:32px"></i><div style="margin-top:8px;font-size:.9rem">${esc(label)}</div><div class="muted" style="font-size:.75rem;margin-top:4px">Sent to default printer (mock)</div></div><button class="btn btn-primary btn-full" style="margin-top:12px" onclick="closeOverlay()">Done</button>`); }
+function nextOrderNumber(){ return 'ORD-'+todayISO().replace(/-/g,'')+'-'+String(ORDERS.length+1).padStart(3,'0'); }
+function nextWorkingDay(){ let d=new Date(todayISO()); do{ d.setDate(d.getDate()+1);}while(!DELIVERY_DAYS.includes(d.getDay())); return d.toISOString().slice(0,10); }
+/* ===================== ORDER WIZARD ===================== */
+function startNewOrder(custId){ state.wizard={step:custId?2:1,customerId:custId||null,lines:[],orderDiscount:0,deliverNow:false,deliveryDate:nextWorkingDay(),notes:'',search:'',category:null,mode:'Catalog',createdId:null}; location.hash='#orders/new'; }
+route('orders/new',{ hideFab:true,
+  title:()=>{ const w=state.wizard; const labels=['Select Customer','Build Order','Review Order','Confirmation']; return labels[(w?w.step:1)-1]; },
+  render:()=>{ if(!state.wizard) startNewOrder(null); return wizardRender(); }
+});
+function wizStepInd(){ const w=state.wizard; const labels=['Select Customer','Build Order','Review Order','Confirmation'];
+  return `<div style="display:flex;gap:4px;margin-bottom:12px">${labels.map((l,i)=>{const n=i+1;const active=n===w.step;const done=n<w.step;
+    return `<div style="flex:1;text-align:center"><div style="height:4px;border-radius:999px;background:${done||active?'var(--primary)':'#e0e0e0'}"></div>
+    <div style="font-size:.62rem;margin-top:4px;color:${active?'var(--primary)':'var(--text-muted)'};font-weight:${active?600:400}">${l}</div></div>`;}).join('')}</div>`; }
+function wizardRender(){ const w=state.wizard;
+  if(w.step===1) return wizStepInd()+wizStep1();
+  if(w.step===2) return wizStepInd()+wizStep2();
+  if(w.step===3) return wizStepInd()+wizStep3();
+  if(w.step===4) return wizStep4();
+}
+function wizStep1(){ const w=state.wizard;
+  let list=CUSTOMERS.filter(c=>{ const q=w.search.toLowerCase(); if(!q)return true;
+    return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q); })
+    .sort((a,b)=>a.name.localeCompare(b.name));
+  return `<input class="inp" placeholder="Search customers or addresses..." value="${esc(w.search)}" oninput="state.wizard.search=this.value;render()"/>
+  <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+    ${list.length?list.map(c=>{ const hold=c.status==='Hold'; const parent=c.isBranch?CUST(c.parentId):null;
+      return `<div class="card" style="display:flex;align-items:center;gap:8px;${hold?'opacity:.5':'cursor:pointer'}" ${hold?'':`onclick="state.wizard.customerId='${c.id}';state.wizard.step=2;render()"`}>
+        <div style="flex:1"><div style="font-weight:600">${esc(c.name)}${c.isBranch?` <span class="badge sm" style="background:#f1f3f4;color:#5f6368"><i data-lucide="git-branch" style="width:10px;height:10px"></i> Branch</span>`:''}</div>
+        ${c.isBranch?`<div class="muted" style="font-size:.72rem">${esc(parent.name)}</div>`:''}
+        <div class="muted" style="font-size:.75rem">${esc(c.address)}</div>${hold?'<div style="color:var(--danger);font-size:.72rem">On hold</div>':''}</div>
+        <i data-lucide="chevron-right" class="muted"></i></div>`;}).join(''):`<div class="muted" style="text-align:center;padding:24px">No matches</div>`}
+  </div>`;
+}
+function wizCartTotals(){ const w=state.wizard;
+  const cases=w.lines.reduce((s,l)=>s+l.quantity,0);
+  const subtotal=w.lines.reduce((s,l)=>s+PROD(l.productId).casePrice*l.quantity,0);
+  const lineDisc=w.lines.reduce((s,l)=>s+l.discount*l.quantity,0);
+  const deposit=w.lines.reduce((s,l)=>s+PROD(l.productId).depositPerCase*l.quantity,0);
+  const discountTotal=lineDisc+(w.orderDiscount||0);
+  const grand=subtotal-discountTotal+deposit;
+  return {cases,subtotal,lineDisc,deposit,discountTotal,grand,items:w.lines.length};
+}
+function topProductIds(){ const counts={}; ORDERS.forEach(o=>o.lineItems.forEach(l=>counts[l.productId]=(counts[l.productId]||0)+l.quantity));
+  return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]); }
+function wizStep2(){ const w=state.wizard; const c=CUST(w.customerId); const t=wizCartTotals();
+  let prods=PRODUCTS.filter(p=>p.status==='Active');
+  if(w.mode==='Favorites') prods=prods.filter(p=>state.favorites.has(p.id));
+  if(w.mode==='Top'){ const order=topProductIds(); prods=prods.slice().sort((a,b)=>order.indexOf(a.id)-order.indexOf(b.id)).filter(p=>order.includes(p.id)); }
+  if(w.category) prods=prods.filter(p=>p.categoryId===w.category);
+  if(w.search){ const q=w.search.toLowerCase(); prods=prods.filter(p=>p.name.toLowerCase().includes(q)||p.code.includes(q)||(p.flavor||'').toLowerCase().includes(q)); }
+  const modeBtn=(m,emoji,label)=>`<button class="btn ${w.mode===m?'btn-primary':'btn-secondary'}" style="flex:1" onclick="state.wizard.mode='${m}';render()">${emoji} ${label}</button>`;
+  return `<div class="card" style="position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+    <div><div style="font-weight:600;font-size:.85rem">Customer: ${esc(c.name)}</div>${c.isBranch?`<div class="muted" style="font-size:.72rem"><i data-lucide="map-pin" style="width:11px;height:11px"></i> ${esc(c.address)}</div>`:''}</div>
+    <div style="text-align:right"><div class="muted" style="font-size:.7rem">Running total</div><div style="font-weight:700;font-size:.85rem">${t.cases} cs · ${money(t.grand)}</div></div></div>
+  <div style="display:flex;gap:6px;margin-bottom:10px">${modeBtn('Catalog','📋','Catalog')}${modeBtn('Favorites','⭐','Favorites')}${modeBtn('Top','📈','Top')}</div>
+  <input class="inp" placeholder="Search products..." value="${esc(w.search)}" oninput="state.wizard.search=this.value;render()"/>
+  <div class="chips" style="margin:10px 0">
+    <button class="chip ${!w.category?'active':''}" onclick="state.wizard.category=null;render()">All</button>
+    ${CATEGORIES.slice().sort((a,b)=>a.sortOrder-b.sortOrder).map(cat=>`<button class="chip ${w.category===cat.id?'active':''}" onclick="state.wizard.category='${cat.id}';render()">${cat.icon} ${esc(cat.name)}</button>`).join('')}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:70px">
+    ${prods.length?prods.map(p=>`<div class="card row-link" style="cursor:pointer" onclick="openProductModal('${p.id}')">
+      <div style="font-weight:600;font-size:.85rem;line-height:1.2">${esc(p.name)}${state.favorites.has(p.id)?' ⭐':''}</div>
+      <div class="muted" style="font-size:.72rem;margin-top:2px">${p.size} · ${p.packSize}</div>
+      <div style="font-size:.78rem;margin-top:4px">${money(p.casePrice)}/cs · ${money(p.unitPrice)}/ea</div>
+      ${p.stock<=0?'<div style="color:#b06000;font-size:.72rem;font-weight:600;margin-top:2px">Low Stock</div>':''}</div>`).join(''):`<div class="muted" style="grid-column:1/3;text-align:center;padding:24px">No products</div>`}
+  </div>
+  <div style="position:absolute;left:0;right:0;bottom:56px;background:#fff;border-top:1px solid var(--border);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;z-index:6">
+    <div style="font-size:.8rem">🛒 ${t.items} items · ${t.cases} cases <span class="muted">| Subtotal ${money(t.subtotal)}</span></div>
+    <button class="btn btn-primary" ${t.items?'':'disabled'} onclick="state.wizard.step=3;render()">Review Order →</button></div>`;
+}
+let pmState=null;
+function itemDiscountCap(casePrice){ return Math.min(casePrice*DISCOUNT_SETTINGS.perItemPercent/100, DISCOUNT_SETTINGS.perItemFixed); }
+function discColor(disc,cap){ if(cap<=0)return ['#e0e0e0','#fff']; const pct=disc/cap*100;
+  if(pct>100) return ['var(--danger)','#fee2e2']; if(pct>50) return ['#f59e0b','#ffedd5']; return ['var(--success)','#dcfce7']; }
+function openProductModal(productId, existingLineId){ const p=PROD(productId);
+  const existing = existingLineId ? state.wizard.lines.find(l=>l.lineId===existingLineId) : null;
+  pmState={productId,lineId:existingLineId||null,quantity:existing?existing.quantity:1,casePrice:existing?existing.casePrice:p.casePrice,discount:existing?existing.discount:0};
+  renderProductModal();
+}
+function renderProductModal(){ const p=PROD(pmState.productId); const cap=itemDiscountCap(pmState.casePrice);
+  const dc=discColor(pmState.discount,cap); const units=pmState.quantity*p.unitsPerCase;
+  const lineTotal=(pmState.casePrice-pmState.discount)*pmState.quantity;
+  const fav=state.favorites.has(p.id);
+  openSheet(`<div style="display:flex;justify-content:flex-end"><button class="iconbtn" style="background:#f1f3f4" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div style="font-weight:700;font-size:1.05rem">${esc(p.name)}</div>
+    <div class="muted" style="font-size:.8rem">${p.size} · ${p.packSize} · ${money(p.unitPrice)}/ea · Code: ${p.code}</div>
+    <div style="margin-top:14px"><div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Quantity (cases)</div>
+      <div style="display:flex;align-items:center;gap:8px;justify-content:center">
+        <button class="btn btn-secondary" style="width:48px;height:48px;font-size:1.3rem" onclick="pmAdj('quantity',-1)">−</button>
+        <input class="inp mono" style="width:64px;text-align:center" value="${pmState.quantity}" onchange="pmState.quantity=Math.max(1,parseInt(this.value)||1);renderProductModal()"/>
+        <button class="btn btn-secondary" style="width:48px;height:48px;font-size:1.3rem" onclick="pmAdj('quantity',1)">+</button></div>
+      <div class="muted" style="font-size:.75rem;text-align:center;margin-top:4px">Units: ${units} (${pmState.quantity} × ${p.unitsPerCase})</div></div>
+    <div style="margin-top:12px"><div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Case Price</div>
+      <input class="inp mono" type="number" step="0.01" min="0.01" value="${pmState.casePrice.toFixed(2)}" onchange="pmState.casePrice=Math.max(0.01,parseFloat(this.value)||0.01);renderProductModal()"/></div>
+    <div style="margin-top:12px"><div style="display:flex;justify-content:space-between"><span style="font-size:.8rem;font-weight:500">Discount %</span><span class="muted" style="font-size:.75rem">max ${DISCOUNT_SETTINGS.perItemPercent} %</span></div>
+      <input type="range" min="0" max="${cap.toFixed(2)}" step="0.5" value="${pmState.discount}" style="width:100%;accent-color:${dc[0]}" oninput="pmState.discount=parseFloat(this.value);renderProductModal()"/>
+      <div style="display:flex;justify-content:space-between;align-items:center"><input class="inp mono" style="width:90px;border-color:${dc[0]};background:${dc[1]}" type="number" step="0.5" min="0" max="${cap.toFixed(2)}" value="${pmState.discount}" onchange="pmState.discount=Math.min(${cap.toFixed(2)},Math.max(0,parseFloat(this.value)||0));renderProductModal()"/>
+      <span style="font-size:.78rem;color:var(--success)">Saves ${money(pmState.discount*pmState.quantity)}</span></div></div>
+    <div class="card" style="background:#f8f9fa;margin-top:12px">${totRow('Deposit / case',p.depositPerCase)}<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span>Line total</span><span class="mono">${money(lineTotal)}</span></div></div>
+    <button class="btn btn-secondary btn-full" style="margin-top:10px;${fav?'color:#d4a017;border-color:#d4a017':''}" onclick="toggleFav('${p.id}')">${fav?'⭐ Remove from Favorites':'☆ Add to Favorites'}</button>
+    <button class="btn btn-primary btn-full btn-lg" style="margin-top:10px" onclick="addToOrder()">${pmState.lineId?'UPDATE ORDER':'ADD TO ORDER'}</button>`);
+}
+function pmAdj(field,delta){ pmState[field]=Math.max(1,pmState[field]+delta); renderProductModal(); }
+function toggleFav(id){ if(state.favorites.has(id))state.favorites.delete(id); else state.favorites.add(id); renderProductModal(); }
+function addToOrder(){ const w=state.wizard; const p=PROD(pmState.productId);
+  if(pmState.lineId){ const l=w.lines.find(x=>x.lineId===pmState.lineId); Object.assign(l,{quantity:pmState.quantity,casePrice:pmState.casePrice,discount:pmState.discount}); closeOverlay(); toast('Order line updated'); render(); return; }
+  // check for existing same product
+  const same=w.lines.find(l=>l.productId===p.id&&l.casePrice===pmState.casePrice&&l.discount===pmState.discount);
+  const diff=w.lines.find(l=>l.productId===p.id&&(l.casePrice!==pmState.casePrice||l.discount!==pmState.discount));
+  if(same){ same.quantity+=pmState.quantity; closeOverlay(); toast('Merged into existing line'); render(); return; }
+  if(diff){ closeOverlay(); confirmDialog('Same product, different price','This product is already in the order at a different price/discount. Merge or add a new line?',()=>{ diff.quantity+=pmState.quantity; toast('Merged'); render(); },'Merge');
+    // also add a New Line option via second button — keep simple: provide new line on overlay
+    $('#ov-content').insertAdjacentHTML('beforeend',`<button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="closeOverlay();pushNewLine('${p.id}',${pmState.quantity},${pmState.casePrice},${pmState.discount})">Add as new line</button>`);
+    return; }
+  pushNewLine(p.id,pmState.quantity,pmState.casePrice,pmState.discount); closeOverlay(); toast('Added to order'); render();
+}
+function pushNewLine(pid,qty,price,disc){ state.wizard.lines.push({lineId:uid('ln'),productId:pid,quantity:qty,casePrice:price,discount:disc}); render(); }
+function orderDiscountCap(subtotal){ return Math.min(subtotal*DISCOUNT_SETTINGS.perOrderPercent/100, DISCOUNT_SETTINGS.perOrderFixed); }
+function wizStep3(){ const w=state.wizard; const c=CUST(w.customerId); const bill=billCust(c); const t=wizCartTotals();
+  const avail=bill.creditLimit-bill.balance;
+  const odCap=orderDiscountCap(t.subtotal); const odc=discColor(w.orderDiscount,odCap);
+  const postBalance=bill.balance+t.grand;
+  const overLimit=c.paymentType==='credit'&&postBalance>bill.creditLimit;
+  const prepaid=c.paymentType==='prepaid';
+  const lineHtml=w.lines.map(l=>{ const p=PROD(l.productId); const edited=l.casePrice!==p.casePrice||l.discount>0;
+    const cap=itemDiscountCap(l.casePrice); const dc=discColor(l.discount,cap); const lt=(l.casePrice-l.discount)*l.quantity;
+    return `<div style="border-bottom:1px solid var(--border);padding:8px 0">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="mono muted" style="font-size:.7rem;width:42px">${p.code}</span>
+        <span style="flex:1;font-size:.82rem;font-weight:500">${esc(p.name)}${edited?' <span class="badge sm" style="background:#fef7e0;color:#b06000">Edited</span>':''}</span>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="wizLineQty('${l.lineId}',-1)">−</button>
+        <span class="mono" style="width:22px;text-align:center">${l.quantity}</span>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="wizLineQty('${l.lineId}',1)">+</button>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="openProductModal('${p.id}','${l.lineId}')"><i data-lucide="pencil" style="width:13px;height:13px"></i></button>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="wizRemove('${l.lineId}')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-top:2px">
+        <span class="muted" style="padding-left:48px">Price ${money(l.casePrice)}${l.discount>0?` · <span style="color:${dc[0]}">-${money(l.discount)} disc</span>`:''}</span>
+        <span class="mono" style="font-weight:600">${money(lt)}</span></div>
+      <div class="muted" style="font-size:.72rem;padding-left:48px">↳ Deposit: ${l.quantity} × ${money(p.depositPerCase)} = ${money(p.depositPerCase*l.quantity)}</div>
+    </div>`;}).join('');
+  return `<div class="card">
+    <div style="font-weight:700">${esc(c.name)}</div>
+    <div class="muted" style="font-size:.78rem">${c.code} · ${esc(c.type)}</div>
+    <div class="muted" style="font-size:.78rem">${esc(c.address)}</div>
+    <div class="muted" style="font-size:.78rem">${esc(c.route)}</div>
+    <div class="muted" style="font-size:.78rem">${c.paymentType==='credit'?`Credit (Available: ${money(avail)})`:'Prepaid'} · ${c.terms} · Price Level ${c.priceLevel}</div></div>
+  ${prepaid&&bill.balance>0?`<div class="card" style="margin-top:10px;background:#fee2e2;border:1px solid var(--danger);color:#991b1b;font-size:.82rem">⚠️ Prepaid customer has ${money(bill.balance)} outstanding — collect payment before submitting.</div>`:''}
+  <div class="card" style="margin-top:10px"><div style="font-weight:600;font-size:.85rem;margin-bottom:4px">Items</div>${lineHtml}
+    <div style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.8rem;font-weight:500">Order Discount %</span><span class="muted" style="font-size:.72rem">max ${DISCOUNT_SETTINGS.perOrderPercent} %</span></div>
+      <input type="range" min="0" max="${odCap.toFixed(2)}" step="0.5" value="${w.orderDiscount}" style="width:100%;accent-color:${odc[0]}" oninput="state.wizard.orderDiscount=parseFloat(this.value);render()"/></div>
+    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+      ${totRow('Subtotal',t.subtotal)}${totRow('Deposit Total',t.deposit)}${totRow('Discount Total',-t.discountTotal)}
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1.15rem;color:var(--primary);margin-top:4px"><span>Grand Total</span><span>${money(t.grand)}</span></div></div></div>
+  <div class="card" style="margin-top:10px">
+    <label style="display:flex;align-items:center;gap:8px;font-size:.9rem"><input type="checkbox" ${w.deliverNow?'checked':''} onchange="state.wizard.deliverNow=this.checked;render()"/> <i data-lucide="truck" style="width:16px;height:16px"></i> Deliver Now (immediate delivery)</label>
+    ${!w.deliverNow?deliveryPicker():`<div class="muted" style="font-size:.8rem;margin-top:6px">Delivery date: ${fmtDate(todayISO())}</div>`}</div>
+  <textarea class="inp" rows="2" style="margin-top:10px" placeholder="Any special instructions..." oninput="state.wizard.notes=this.value">${esc(w.notes)}</textarea>
+  ${overLimit?`<div class="card" style="margin-top:10px;background:#ffedd5;color:#9a3412;font-size:.82rem">⚠️ Over Credit Limit — Post-order balance ${money(postBalance)} exceeds limit ${money(bill.creditLimit)}. Requires manager approval.</div>`:''}
+  ${prepaid?(w._paid?`<div class="card" style="margin-top:10px;background:#dcfce7;color:#166534;font-size:.82rem">✅ Payment collected</div>`:`<div class="card" style="margin-top:10px;background:#fee2e2;color:#991b1b;font-size:.82rem">🔴 Prepay Required — Payment of ${money(t.grand)} must be collected before confirming.</div>`):''}
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-secondary" onclick="state.wizard.step=2;render()">← Back</button>
+    <button class="btn btn-secondary" onclick="state.wizard.step=2;render()">➕ Add More</button></div>
+  ${prepaid
+    ? `<button class="btn btn-primary btn-full btn-lg" style="margin-top:8px" onclick="openPaymentModalWizard()">💳 Submit & Pay</button>`
+    : `<div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-secondary btn-full" onclick="openPaymentModalWizard()">💳 Pay Now</button><button class="btn btn-primary btn-full" onclick="submitWizardOrder(false)">Submit Order</button></div>`}`;
+}
+function deliveryPicker(){ const w=state.wizard; const base=new Date(todayISO()); const days=[];
+  for(let i=1;i<=14;i++){ const d=new Date(base); d.setDate(d.getDate()+i); days.push(d); }
+  return `<div style="display:flex;gap:6px;overflow-x:auto;margin-top:8px;padding-bottom:4px">${days.map(d=>{ const iso=d.toISOString().slice(0,10); const working=DELIVERY_DAYS.includes(d.getDay()); const sel=w.deliveryDate===iso;
+    return `<button ${working?`onclick="state.wizard.deliveryDate='${iso}';render()"`:'disabled'} style="flex:0 0 auto;width:48px;padding:6px 0;border-radius:8px;border:1px solid ${sel?'var(--primary)':'var(--border)'};background:${sel?'var(--primary)':working?'#fff':'#f1f3f4'};color:${sel?'#fff':working?'var(--text-primary)':'var(--text-muted)'};font-size:.72rem">
+      <div>${d.toLocaleDateString('en-US',{weekday:'short'})}</div><div style="font-weight:600">${d.getDate()}</div></button>`;}).join('')}</div>`;
+}
+function wizLineQty(lid,d){ const l=state.wizard.lines.find(x=>x.lineId===lid); l.quantity=Math.max(1,l.quantity+d); render(); }
+function wizRemove(lid){ state.wizard.lines=state.wizard.lines.filter(x=>x.lineId!==lid); if(!state.wizard.lines.length)state.wizard.step=2; render(); }
+function submitWizardOrder(paid){ const w=state.wizard; const c=CUST(w.customerId);
+  const lineItems=w.lines.map(l=>{ const p=PROD(l.productId); return mkLineFrom(l,p); });
+  const o=makeOrder({id:uid('o'),orderNumber:nextOrderNumber(),customerId:w.customerId,salespersonId:CURRENT_USER_ID,status:'Submitted',
+    orderDiscount:w.orderDiscount,lineItems,deliveryDate:w.deliverNow?todayISO():w.deliveryDate,notes:w.notes,createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString()});
+  ORDERS.unshift(o); w.createdId=o.id; w.step=4;
+  RECENT_ACTIVITY.unshift({id:uid('a'),type:'order',text:`Order #${o.orderNumber} placed — ${c.name}`,date:new Date().toISOString(),linkTo:'#orders/'+o.id});
+  toast('Order submitted'); render();
+}
+function mkLineFrom(l,p){ const lineTotal=(l.casePrice-l.discount)*l.quantity;
+  return {lineId:l.lineId,productId:p.id,productCode:p.code,productName:p.name,quantity:l.quantity,unitsPerCase:p.unitsPerCase,casePrice:l.casePrice,unitPrice:p.unitPrice,depositPerCase:p.depositPerCase,discount:l.discount,lineTotal,depositTotal:p.depositPerCase*l.quantity}; }
+function openPaymentModalWizard(){ const w=state.wizard; const c=CUST(w.customerId); const t=wizCartTotals();
+  paymentModal({customerId:c.id,amount:t.grand,context:'1 order',onSuccess:()=>{ w._paid=true; submitWizardOrder(true); }});
+}
+function wizStep4(){ const w=state.wizard; const o=ORD(w.createdId); if(!o) return empty('check','Done','');
+  return `<div style="text-align:center;padding:32px 16px">
+    <div style="width:64px;height:64px;border-radius:999px;background:#dcfce7;color:#166534;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:2rem">✓</div>
+    <h1 style="font-size:1.5rem;font-weight:600;margin:16px 0 4px">Order Submitted!</h1>
+    <div class="mono" style="color:var(--primary);font-weight:700;font-size:1.1rem">${o.orderNumber}</div>
+    <div class="muted" style="margin-top:8px">${o.totalCases} cases · ${money(o.grandTotal)}</div>
+    <div class="muted" style="font-size:.85rem">Delivery: ${fmtDate(o.deliveryDate)}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:24px">
+      <button class="btn btn-primary btn-full btn-lg" onclick="state.wizard=null;location.hash='#orders/${o.id}'">View Order</button>
+      <button class="btn btn-secondary btn-full" onclick="startNewOrder(null)">New Order</button>
+      <button class="btn btn-full" style="background:none;border:1px solid var(--border)" onclick="state.wizard=null;location.hash='#home'">Back to Dashboard</button>
+    </div></div>`;
+}
+
+/* ===================== PAYMENT MODAL (reusable) ===================== */
+let payModalState=null;
+function paymentModal(cfg){ const c=CUST(cfg.customerId);
+  payModalState={customerId:cfg.customerId,amount:cfg.amount||0,method:'Cash',reference:'',context:cfg.context||'',onSuccess:cfg.onSuccess,stage:'form',selectedPM:null,apply:cfg.apply};
+  renderPaymentModal();
+}
+function renderPaymentModal(){ const s=payModalState; const c=CUST(s.customerId);
+  if(s.stage==='processing'){ const pm=s.selectedPM; openSheet(`<div style="text-align:center;padding:32px">
+    <div class="spinner" style="width:36px;height:36px;border:3px solid #eee;border-top-color:var(--primary);border-radius:999px;margin:0 auto;animation:spin 1s linear infinite"></div>
+    <div style="margin-top:12px">${pm?`Charging ${pm.brand} ••••${pm.last4}...`:'Processing...'}</div></div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`); return; }
+  if(s.stage==='success'){ openSheet(`<div style="text-align:center;padding:16px">
+    <div style="width:56px;height:56px;border-radius:999px;background:#dcfce7;color:#166534;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:1.6rem">✓</div>
+    <h3 style="margin:12px 0 4px">Payment Processed!</h3>
+    <div style="font-size:1.8rem;font-weight:700">${money(s.amount)}</div>
+    <div class="muted" style="font-size:.85rem">${s.method}${s.reference?' · #'+esc(s.reference):''}</div></div>
+    <div class="card" style="background:#f8f9fa"><div style="font-size:.82rem">Customer: ${esc(c.name)}</div><div style="font-size:.82rem">Date: ${fmtDT(new Date().toISOString())}</div></div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary btn-full" onclick="printStandin('Payment Receipt')">🖨 Print</button><button class="btn btn-secondary btn-full" onclick="toast('Receipt emailed')">✉️ Email</button></div>
+    <button class="btn btn-primary btn-full" style="margin-top:8px" onclick="finishPayment()">Done</button>`); return; }
+  const methods=['Cash','Check','Card','ACH','Account Credit'];
+  const cards=c.savedPaymentMethods.filter(m=>m.type==='credit_card');
+  const banks=c.savedPaymentMethods.filter(m=>m.type==='ach');
+  const needSaved=(s.method==='Card'&&!cards.length)||(s.method==='ACH'&&!banks.length);
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="margin:0">${s.apply?'Apply Payment':'Collect Payment'}</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div class="muted" style="font-size:.82rem">${esc(c.name)}${s.context?' · '+s.context:''}</div>
+    <div style="margin-top:12px"><div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Amount</div>
+      <div style="display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;padding:0 12px"><span>$</span><input class="inp mono" style="border:none" type="number" step="0.01" value="${s.amount.toFixed(2)}" onchange="payModalState.amount=parseFloat(this.value)||0;renderPaymentModal()"/></div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px">${methods.map(m=>`<button class="btn ${s.method===m?'btn-primary':'btn-secondary'}" style="font-size:.78rem;padding:8px 4px" onclick="payModalState.method='${m}';payModalState.selectedPM=null;renderPaymentModal()">${m}</button>`).join('')}</div>
+    ${s.method==='Card'&&cards.length?`<div style="margin-top:10px">${cards.map(m=>`<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:.82rem"><input type="radio" name="pm" ${s.selectedPM===m.id?'checked':''} onchange="payModalState.selectedPM='${m.id}'"/> ${m.brand} ••••${m.last4} · Exp ${m.expiry}${m.isDefault?' · Default':''}</label>`).join('')}</div>`:''}
+    ${s.method==='ACH'&&banks.length?`<div style="margin-top:10px">${banks.map(m=>`<label style="display:flex;gap:8px;align-items:center;padding:6px 0;font-size:.82rem"><input type="radio" name="pm" ${s.selectedPM===m.id?'checked':''} onchange="payModalState.selectedPM='${m.id}'"/> ${m.brand} ••••${m.last4}${m.isDefault?' · Default':''}</label>`).join('')}</div>`:''}
+    ${needSaved?`<div class="card" style="margin-top:10px;background:#fef7e0;color:#b06000;font-size:.8rem">No saved ${s.method==='Card'?'card':'bank'} on file.
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-secondary btn-full" onclick="addPM('${c.id}','${s.method==='Card'?'credit_card':'ach'}');renderPaymentModal()">Add ${s.method==='Card'?'Card':'Bank'}</button><button class="btn btn-secondary btn-full" onclick="closeOverlay();openPaymentLinkForm('${c.id}')">Send Payment Link</button></div></div>`:''}
+    <input class="inp" style="margin-top:10px" placeholder="Reference (check #, txn ID)" value="${esc(s.reference)}" oninput="payModalState.reference=this.value"/>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-secondary btn-full" onclick="closeOverlay()">Cancel</button>
+      <button class="btn btn-primary btn-full" onclick="processPayment()">${s.apply?'Apply':'Charge'} ${esc(s.method)} ${money(s.amount)}</button></div>`);
+}
+function processPayment(){ const s=payModalState; const c=CUST(s.customerId);
+  const isCard=s.method==='Card'||s.method==='ACH'; s.selectedPM=isCard?(c.savedPaymentMethods.find(m=>m.id===s.selectedPM)||c.savedPaymentMethods.find(m=>m.isDefault)):null;
+  s.stage='processing'; renderPaymentModal();
+  setTimeout(()=>{ s.stage='success'; renderPaymentModal();
+    PAYMENTS.unshift({id:uid('pay'),customerId:c.id,amount:s.amount,method:s.method,appliedTo:s.applyTo||[],unappliedAmount:0,reference:s.reference,date:new Date().toISOString(),collectedBy:CURRENT_USER_ID});
+  }, 1200);
+}
+function finishPayment(){ const s=payModalState; closeOverlay(); toast('Payment posted'); if(s.onSuccess)s.onSuccess(); else render(); }
+/* ===================== PAYMENT SCREEN ===================== */
+const payScreen={customerId:null,q:'',tab:'Invoices',selected:new Set()};
+function startPayment(custId){ payScreen.customerId=custId; payScreen.selected=new Set(); location.hash='#payments'; }
+route('payments',{ root:true, title:'Collect Payment', hideFab:true,
+  render:()=> payScreen.customerId ? paymentSelected() : paymentPickCustomer()
+});
+function paymentPickCustomer(){
+  let list=CUSTOMERS.filter(c=>{ const q=payScreen.q.toLowerCase(); if(!q)return true; return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q); }).sort((a,b)=>a.name.localeCompare(b.name));
+  return `<input class="inp" placeholder="Search customers..." value="${esc(payScreen.q)}" oninput="payScreen.q=this.value;render()"/>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">${list.map(c=>`<div class="card row-link" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="startPayment('${c.id}')">
+      <span style="font-weight:600">${esc(c.name)}</span><span class="muted" style="font-size:.85rem">Balance: ${money(c.balance)}</span></div>`).join('')}</div>`;
+}
+function paymentSelected(){ const c=CUST(payScreen.customerId);
+  const invoices=INVOICES.filter(i=>i.customerId===c.id&&i.status!=='Paid');
+  const orders=ORDERS.filter(o=>o.customerId===c.id&&['Delivered'].includes(o.status)&&!INVOICES.some(i=>i.orderId===o.id&&i.status==='Paid'));
+  const items = payScreen.tab==='Invoices'?invoices:orders;
+  const selTotal=[...payScreen.selected].reduce((s,id)=>{ const inv=INV(id); if(inv)return s+inv.amountDue; const o=ORD(id); return s+(o?o.grandTotal:0); },0);
+  const row=(item,isInv)=>{ const id=item.id; const sel=payScreen.selected.has(id); const num=isInv?item.invoiceNumber:item.orderNumber; const bal=isInv?item.amountDue:item.grandTotal; const dt=isInv?('due '+fmtDate(item.dueDate)):fmtDate(item.createdDate);
+    return `<div class="card" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <input type="checkbox" ${sel?'checked':''} onchange="togglePaySel('${id}')"/>
+      <div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span class="mono" style="font-weight:600;font-size:.82rem">${num}</span>${statusBadge(item.status)}</div>
+        <div class="muted" style="font-size:.75rem">${dt} · ${money(bal)}</div></div>
+      ${c.accountCredit>0?`<button class="btn btn-secondary" style="padding:4px 8px;font-size:.72rem" onclick="useCreditOn('${id}')">Use Credit</button>`:''}</div>`;};
+  return `<div class="card" style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-weight:600">${esc(c.name)}</div><div class="muted" style="font-size:.8rem">Balance ${money(c.balance)}</div></div>
+      <button class="btn btn-secondary" onclick="payScreen.customerId=null;render()">Change</button></div>
+    ${c.accountCredit>0?`<div class="card" style="margin-top:10px;background:#dcfce7;color:#166534;display:flex;justify-content:space-between;align-items:center">
+      <span>💰 Account Credit: ${money(c.accountCredit)}</span><button class="btn btn-primary" style="padding:6px 10px;font-size:.75rem" onclick="justCollectCredit('${c.id}')">Just Collect Payment</button></div>`:''}
+    <div style="display:flex;gap:6px;margin-top:12px">
+      <button class="btn ${payScreen.tab==='Orders'?'btn-primary':'btn-secondary'} btn-full" onclick="payScreen.tab='Orders';payScreen.selected=new Set();render()">Orders (${orders.length})</button>
+      <button class="btn ${payScreen.tab==='Invoices'?'btn-primary':'btn-secondary'} btn-full" onclick="payScreen.tab='Invoices';payScreen.selected=new Set();render()">Invoices (${invoices.length})</button></div>
+    <div style="margin-top:12px"><button class="btn btn-secondary" style="padding:4px 10px;font-size:.75rem;margin-bottom:8px" onclick="selectAllPay()">Select All</button>
+      ${items.length?items.map(it=>row(it,payScreen.tab==='Invoices')).join(''):empty('check-circle','Nothing outstanding','')}</div>
+    <div style="position:absolute;left:0;right:0;bottom:56px;background:#fff;border-top:1px solid var(--border);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-weight:600">Selected total: ${money(selTotal)}</span>
+      <button class="btn btn-primary" ${selTotal>0?'':'disabled'} onclick="openPayForSelection()">Collect</button></div>`;
+}
+function togglePaySel(id){ if(payScreen.selected.has(id))payScreen.selected.delete(id); else payScreen.selected.add(id); render(); }
+function selectAllPay(){ const c=CUST(payScreen.customerId);
+  const items=payScreen.tab==='Invoices'?INVOICES.filter(i=>i.customerId===c.id&&i.status!=='Paid'):ORDERS.filter(o=>o.customerId===c.id&&o.status==='Delivered');
+  items.forEach(i=>payScreen.selected.add(i.id)); render(); }
+function openPayForSelection(){ const c=CUST(payScreen.customerId);
+  const selTotal=[...payScreen.selected].reduce((s,id)=>{ const inv=INV(id); if(inv)return s+inv.amountDue; const o=ORD(id); return s+(o?o.grandTotal:0); },0);
+  const applyTo=[...payScreen.selected].filter(id=>INV(id)).map(id=>({invoiceId:id,amount:INV(id).amountDue}));
+  paymentModal({customerId:c.id,amount:selTotal,context:`${payScreen.selected.size} ${payScreen.tab.toLowerCase()}`,apply:true,onSuccess:()=>{ applyTo.forEach(a=>{const inv=INV(a.invoiceId); inv.amountPaid+=a.amount; inv.amountDue=Math.max(0,inv.grandTotal-inv.amountPaid); recomputeInvoiceStatus(inv);}); payScreen.selected=new Set(); render(); }});
+  payModalState.applyTo=applyTo;
+}
+function useCreditOn(id){ const c=CUST(payScreen.customerId); const inv=INV(id); const amt=Math.min(c.accountCredit, inv?inv.amountDue:ORD(id).grandTotal);
+  c.accountCredit-=amt; if(inv){inv.amountPaid+=amt;inv.amountDue=Math.max(0,inv.grandTotal-inv.amountPaid);recomputeInvoiceStatus(inv);} toast(`Applied ${money(amt)} account credit`); render(); }
+function justCollectCredit(cid){ paymentModal({customerId:cid,amount:0,context:'Account Credit',onSuccess:()=>{ CUST(cid).accountCredit+=payModalState.amount; render(); }}); payModalState.method='Account Credit'; }
+/* ===================== RETURNS ===================== */
+route('returns',{ title:(ctx)=> ctx.id ? (RET(ctx.id)?RET(ctx.id).returnNumber:'Return') : 'Returns', hideFab:true,
+  render:(ctx)=> ctx.id ? viewReturn(ctx.id) : returnsListRedirect() });
+function returnsListRedirect(){ location.hash='#orders'; orderFilter.chip='Returns'; return ''; }
+route('returns/new',{ title:'New Return', hideFab:true, render:()=>{ if(!state.returnWizard) startReturnWizard(); return returnWizardRender(); }});
+function startReturnWizard(){ state.returnWizard={step:1,customerId:null,originalOrderId:null,fromScratch:false,lines:[],reason:null,notes:'',q:''}; }
+function startReturnFromOrder(orderId){ const o=ORD(orderId); state.returnWizard={step:2,customerId:o.customerId,originalOrderId:o.id,fromScratch:false,
+  lines:o.lineItems.map(l=>({lineId:uid('rl'),productId:l.productId,quantity:l.quantity,casePrice:l.casePrice,discount:l.discount,isDamaged:false,damageType:null})),reason:null,notes:'',q:''};
+  location.hash='#returns/new'; }
+function rwStepInd(){ const w=state.returnWizard; return `<div style="display:flex;gap:8px;justify-content:center;margin-bottom:12px">${[1,2,3].map(n=>`<div style="width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:.8rem;background:${n<w.step?'var(--success)':n===w.step?'var(--primary)':'#e0e0e0'};color:#fff">${n<w.step?'✓':n}</div>`).join('')}</div>`; }
+function returnWizardRender(){ const w=state.returnWizard;
+  if(w.step===1) return rwStepInd()+rwStep1();
+  if(w.step===2) return rwStepInd()+rwStep2();
+  if(w.step===3) return rwStepInd()+rwStep3();
+}
+function rwStep1(){ const w=state.returnWizard;
+  const delivered=ORDERS.filter(o=>o.status==='Delivered').filter(o=>{ const q=w.q.toLowerCase(); if(!q)return true; return o.orderNumber.toLowerCase().includes(q)||CUST(o.customerId).name.toLowerCase().includes(q); });
+  return `<h3 style="font-size:1.1rem;font-weight:600;margin:0 0 8px">Select Return Source</h3>
+    <input class="inp" placeholder="Search delivered orders..." value="${esc(w.q)}" oninput="state.returnWizard.q=this.value;render()"/>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">${delivered.map(o=>{ const c=CUST(o.customerId);
+      return `<div class="card row-link" style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="loadReturnFromOrder('${o.id}')">
+        <div><div style="font-weight:600">${esc(c.name)}</div><div class="muted" style="font-size:.78rem">${o.orderNumber} · ${fmtDate(o.deliveryDate)}</div></div>
+        <span style="font-weight:600">${money(o.grandTotal)}</span></div>`;}).join('')}</div>
+    <div style="margin-top:16px;text-align:center"><button class="btn btn-secondary" onclick="startReturnScratch()">+ Start from scratch (no order link)</button></div>`;
+}
+function loadReturnFromOrder(orderId){ const o=ORD(orderId); const w=state.returnWizard; w.customerId=o.customerId; w.originalOrderId=o.id; w.fromScratch=false;
+  w.lines=o.lineItems.map(l=>({lineId:uid('rl'),productId:l.productId,quantity:l.quantity,casePrice:l.casePrice,discount:l.discount,isDamaged:false,damageType:null})); w.step=2; render(); }
+function startReturnScratch(){ const w=state.returnWizard; w.fromScratch=true; w.customerId=CUSTOMERS[0].id; w.lines=[{lineId:uid('rl'),productId:'p10',quantity:1,casePrice:PROD('p10').casePrice,discount:0,isDamaged:false,damageType:null}]; w.step=2; toast('From-scratch return started'); render(); }
+function rlProd(l){ return PROD(l.baseProductId||l.productId); }
+function rlName(l){ return rlProd(l).name+(l.nameSuffix||''); }
+function rlCode(l){ return rlProd(l).code+(l.codeSuffix||''); }
+function rwStep2(){ const w=state.returnWizard;
+  const rows=w.lines.map(l=>{ const p=rlProd(l); const lt=(l.casePrice-l.discount)*l.quantity;
+    return `<div class="card" style="margin-bottom:8px;${l.isDamaged?'background:#fee2e2':''}">
+      <div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1"><div style="font-weight:500;font-size:.85rem">${esc(rlName(l))}</div><div class="mono muted" style="font-size:.72rem">${rlCode(l)}</div></div>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="rwQty('${l.lineId}',-1)">−</button><span class="mono" style="width:22px;text-align:center">${l.quantity}</span><button class="iconbtn" style="width:24px;height:24px" onclick="rwQty('${l.lineId}',1)">+</button>
+        <span class="mono" style="width:60px;text-align:right;font-weight:600">${money(lt)}</span>
+        <button class="iconbtn" style="width:24px;height:24px" onclick="rwRemove('${l.lineId}')"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:4px;font-size:.78rem"><input type="checkbox" ${l.isDamaged?'checked':''} onchange="rwToggleDamage('${l.lineId}',this.checked)"/> Damaged</label>
+        ${l.isDamaged?`<select class="inp" style="width:auto;padding:4px 8px;font-size:.78rem" onchange="rwSetDamageType('${l.lineId}',this.value)">${DAMAGE_TYPES.map(d=>`<option ${l.damageType===d?'selected':''}>${d}</option>`).join('')}</select>
+          <span class="badge sm" style="background:#fce8e6;color:#c5221f">💔 Damaged: ${l.damageType||DAMAGE_TYPES[0]}</span>`:''}
+        ${l.quantity>1&&!l.isDamaged?`<button class="btn btn-secondary" style="padding:3px 8px;font-size:.72rem" onclick="openSplitModal('${l.lineId}')"><i data-lucide="scissors" style="width:12px;height:12px"></i> Split</button>`:''}
+      </div></div>`;}).join('');
+  return `<h3 style="font-size:1.1rem;font-weight:600;margin:0 0 8px">Mark Damaged Items</h3>
+    ${rows}
+    <button class="btn btn-danger btn-full" style="margin-top:6px" onclick="openMarkAllDamaged()">Mark All Damaged</button>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-secondary btn-full" onclick="state.returnWizard.step=1;render()">← Back</button><button class="btn btn-primary btn-full" onclick="state.returnWizard.step=3;render()">Next →</button></div>`;
+}
+function rwQty(lid,d){ const l=state.returnWizard.lines.find(x=>x.lineId===lid); l.quantity=Math.max(1,l.quantity+d); render(); }
+function rwRemove(lid){ state.returnWizard.lines=state.returnWizard.lines.filter(x=>x.lineId!==lid); render(); }
+function rwToggleDamage(lid,v){ const l=state.returnWizard.lines.find(x=>x.lineId===lid); l.isDamaged=v; l.damageType=v?DAMAGE_TYPES[0]:null; render(); }
+function rwSetDamageType(lid,v){ const l=state.returnWizard.lines.find(x=>x.lineId===lid); l.damageType=v; render(); }
+function openSplitModal(lid){ const l=state.returnWizard.lines.find(x=>x.lineId===lid); const p=PROD(l.productId);
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Split Line — ${esc(p.name)}</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div><div style="font-size:.8rem">Undamaged Qty</div><input class="inp mono" id="splUndam" type="number" min="1" value="${l.quantity-1}" max="${l.quantity-1}"/></div>
+      <div><div style="font-size:.8rem">Damaged Qty</div><input class="inp mono" id="splDam" type="number" min="1" value="1"/></div>
+      <div><div style="font-size:.8rem">Damage Type</div><select class="inp" id="splType">${DAMAGE_TYPES.map(d=>`<option>${d}</option>`).join('')}</select></div>
+      <button class="btn btn-primary btn-full" onclick="doSplit('${lid}')">Split Line</button></div>`);
+}
+function doSplit(lid){ const w=state.returnWizard; const l=w.lines.find(x=>x.lineId===lid); const p=PROD(l.productId);
+  const und=parseInt($('#splUndam').value)||0; const dam=parseInt($('#splDam').value)||0; const type=$('#splType').value;
+  if(und<1||dam<1){ toast('Both quantities must be > 0','error'); return; }
+  l.quantity=und;
+  w.lines.push({lineId:uid('rl'),productId:l.productId+'_damaged',baseProductId:l.productId,quantity:dam,casePrice:l.casePrice,discount:l.discount,isDamaged:true,damageType:type,codeSuffix:'D',nameSuffix:'-damaged'});
+  closeOverlay(); toast('Line split'); render(); }
+function openMarkAllDamaged(){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Mark All Damaged</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="font-size:.8rem;margin-bottom:6px">Damage Type for all items</div><select class="inp" id="allDamType">${DAMAGE_TYPES.map(d=>`<option>${d}</option>`).join('')}</select>
+  <button class="btn btn-danger btn-full" style="margin-top:12px" onclick="applyMarkAll()">Apply to All</button>`); }
+function applyMarkAll(){ const t=$('#allDamType').value; state.returnWizard.lines.forEach(l=>{l.isDamaged=true;l.damageType=t;}); closeOverlay(); toast('All items marked damaged'); render(); }
+function rwTotals(){ const w=state.returnWizard; const lines=w.lines;
+  const subtotal=lines.reduce((s,l)=>s+l.casePrice*l.quantity,0);
+  const discountTotal=lines.reduce((s,l)=>s+l.discount*l.quantity,0);
+  const depositTotal=lines.reduce((s,l)=>s+rlProd(l).depositPerCase*l.quantity,0);
+  const grandTotal=subtotal-discountTotal+depositTotal;
+  return {subtotal,discountTotal,depositTotal,grandTotal}; }
+function rwStep3(){ const w=state.returnWizard; const t=rwTotals(); const c=CUST(w.customerId);
+  return `<h3 style="font-size:1.1rem;font-weight:600;margin:0 0 8px">Review Return</h3>
+    <div style="font-size:.82rem;font-weight:500;margin-bottom:6px">Return Reason</div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">${RETURN_REASONS.map(r=>`<button class="btn ${w.reason===r.id?'btn-primary':'btn-secondary'}" style="justify-content:flex-start;font-size:.78rem;padding:8px" onclick="state.returnWizard.reason='${r.id}';render()">${r.icon} ${r.label}</button>`).join('')}</div>
+    <div class="card" style="margin-top:12px"><div style="font-weight:600;font-size:.85rem;margin-bottom:6px">Items</div>
+      ${w.lines.map(l=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);${l.isDamaged?'background:#fee2e2;margin:0 -8px;padding:6px 8px':''}">
+        <div style="font-size:.82rem">${esc(rlName(l))} <span class="muted">×${l.quantity}</span>${l.isDamaged?` <span class="badge sm" style="background:#fce8e6;color:#c5221f">💔 Damaged: ${l.damageType}</span>`:''}</div>
+        <span class="mono" style="font-size:.82rem">${money((l.casePrice-l.discount)*l.quantity)}</span></div>`).join('')}
+      <div style="margin-top:8px">${totRow('Subtotal',t.subtotal)}${totRow('Deposits',t.depositTotal)}${totRow('Discounts',-t.discountTotal)}
+        <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--success);margin-top:4px"><span>Credit Amount</span><span>${money(t.grandTotal)}</span></div></div></div>
+    <textarea class="inp" rows="2" style="margin-top:10px" placeholder="Notes..." oninput="state.returnWizard.notes=this.value">${esc(w.notes)}</textarea>
+    <div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-secondary btn-full" onclick="state.returnWizard.step=2;render()">Cancel</button>
+      <button class="btn btn-full" style="background:var(--success);color:#fff" onclick="submitReturn()">Submit Return</button></div>`;
+}
+function submitReturn(){ const w=state.returnWizard; if(!w.reason){ toast('Select a return reason','error'); return; }
+  const lineItems=w.lines.map(l=>{ const p=rlProd(l); const lt=(l.casePrice-l.discount)*l.quantity;
+    return {productId:l.productId,productCode:rlCode(l),productName:rlName(l),quantity:l.quantity,unitsPerCase:p.unitsPerCase,casePrice:l.casePrice,unitPrice:p.unitPrice,depositPerCase:p.depositPerCase,discount:l.discount,lineTotal:lt,depositTotal:p.depositPerCase*l.quantity,isDamaged:l.isDamaged,damageType:l.damageType}; });
+  const r=makeReturn({id:uid('r'),returnNumber:'RET-'+todayISO().replace(/-/g,'')+'-'+String(RETURNS.length+1).padStart(3,'0'),customerId:w.customerId,salespersonId:CURRENT_USER_ID,status:'Pending',originalOrderId:w.originalOrderId,returnReason:w.reason,lineItems,notes:w.notes,createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString(),processedDate:null});
+  RETURNS.unshift(r); state.returnWizard=null; toast('Return submitted'); location.hash='#returns/'+r.id; }
+function viewReturn(id){ const r=RET(id); if(!r) return empty('rotate-ccw','Return not found',''); const c=CUST(r.customerId); const reason=RETURN_REASONS.find(x=>x.id===r.returnReason);
+  const origInv=r.originalOrderId?INVOICES.find(i=>i.orderId===r.originalOrderId):null;
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="iconbtn" onclick="openReturnMenu('${id}')"><i data-lucide="more-vertical"></i></button></div>
+    <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:12px">
+      <div style="width:24px;height:24px;border-radius:999px;background:var(--success);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem">${r.status==='Processed'?'✓':'1'}</div><span class="timeline-label">Pending</span>
+      <div style="width:30px;height:2px;background:${r.status==='Processed'?'var(--success)':'#e0e0e0'}"></div>
+      <div style="width:24px;height:24px;border-radius:999px;background:${r.status==='Processed'?'var(--success)':'#e0e0e0'};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem">2</div><span class="timeline-label">Processed</span></div>
+    <div class="muted" style="font-size:.8rem;text-align:center;margin-bottom:8px">${origInv?origInv.invoiceNumber+' · ':''}${reason?reason.icon+' '+reason.label:''}</div>
+    <div class="card" style="${r.status==='Processed'?'background:#dcfce7;color:#166534;border-left:3px solid var(--success)':'background:#ffedd5;color:#9a3412;border-left:3px solid #f59e0b'};font-size:.85rem">${r.status==='Processed'?'✅ Return processed & credit applied':'⏳ Return is pending processing'}</div>
+    <div class="card" style="margin-top:10px"><div style="font-weight:600">${esc(c.name)}</div>
+      ${r.lineItems.map(l=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);${l.isDamaged?'background:#fee2e2;margin:0 -8px;padding:6px 8px':''}">
+        <span style="font-size:.82rem">${esc(l.productName)} ×${l.quantity}${l.isDamaged?` <span class="badge sm" style="background:#fce8e6;color:#c5221f">💔 ${l.damageType}</span>`:''}</span><span class="mono" style="font-size:.82rem">${money(l.lineTotal)}</span></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;font-weight:700;color:var(--success);margin-top:8px"><span>Credit Amount</span><span>${money(r.grandTotal)}</span></div></div>
+    ${r.status==='Pending'?`<button class="btn btn-primary btn-full" style="margin-top:10px" onclick="processReturn('${id}')">Process Return & Apply Credit</button>`:''}`;
+}
+function openReturnMenu(id){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Return Actions</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <button class="btn btn-secondary btn-full" style="margin-bottom:8px;justify-content:flex-start" onclick="closeOverlay();printStandin('Return ${RET(id).returnNumber}')">🖨 Print</button>
+  <button class="btn btn-secondary btn-full" style="justify-content:flex-start" onclick="closeOverlay();toast('Return emailed')">✉️ Send Email</button>`); }
+function processReturn(id){ const r=RET(id); r.status='Processed'; r.processedDate=new Date().toISOString(); r.creditApplied=r.grandTotal;
+  const c=CUST(r.customerId); c.accountCredit+=r.grandTotal; toast('Return processed & credit applied'); render(); }
+/* ===================== REPORTS ===================== */
+route('reports',{ root:true, title:'Reports', headerRight:()=>bellBtn(),
+  render:()=>{
+    const openBalance=CUSTOMERS.reduce((s,c)=>s+c.balance,0);
+    const overdue=INVOICES.filter(i=>i.status==='Overdue').length;
+    const returnsYTD=RETURNS.length;
+    const kpi=(emoji,label,val,hash)=>`<div class="card row-link" ${hash?`onclick="location.hash='${hash}'"`:''} style="cursor:pointer"><div style="font-size:1.3rem">${emoji}</div><div style="font-size:1.4rem;font-weight:700">${val}</div><div class="muted" style="font-size:.78rem">${label}</div></div>`;
+    const tool=(emoji,label,hash,badge)=>`<button class="card row-link" onclick="location.hash='${hash}'" style="text-align:left;border:none;cursor:pointer;position:relative"><div style="font-size:1.3rem">${emoji}</div><div style="font-weight:500;margin-top:4px">${label}</div>${badge?`<span style="position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;border-radius:999px;font-size:.65rem;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px">${badge}</span>`:''}</button>`;
+    return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${kpi('💰','Open Balance',money(openBalance))}${kpi('⏰','Overdue Invoices',overdue)}
+        ${kpi('↩','Returns YTD',returnsYTD)}${kpi('👥','Customers',CUSTOMERS.length,'#customers')}</div>
+      <h3 style="font-size:1.1rem;font-weight:500;margin:18px 0 8px">Tools</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${tool('🔔','Notifications','#notifications',unreadCount())}
+        ${tool('✅','Tasks','#tasks',openTasks().length)}
+        ${tool('🔗','Payment Links','#payment_links',pendingLinks().length)}
+        ${tool('⚙️','Settings','#settings')}</div>
+      ${returnsReportWidget()}
+      <h3 style="font-size:1.1rem;font-weight:500;margin:18px 0 8px">Recent Returns</h3>
+      ${RETURNS.slice(0,5).map(returnRow).join('')||empty('rotate-ccw','No returns','')}`;
+  }
+});
+function returnsReportWidget(){ const pending=RETURNS.filter(r=>r.status==='Pending').length; const processed=RETURNS.filter(r=>r.status==='Processed').length;
+  const damaged=RETURNS.reduce((s,r)=>s+r.lineItems.filter(l=>l.isDamaged).reduce((a,l)=>a+l.quantity,0),0);
+  const byCust={}; RETURNS.forEach(r=>{byCust[r.customerId]=(byCust[r.customerId]||0)+r.grandTotal;});
+  return `<h3 style="font-size:1.1rem;font-weight:500;margin:18px 0 8px">Returns Report</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="chip" style="background:#ffedd5;color:#9a3412;border-color:#ffedd5">⏳ Pending: ${pending}</span>
+      <span class="chip" style="background:#dcfce7;color:#166534;border-color:#dcfce7">✓ Processed: ${processed}</span>
+      ${damaged>0?`<span class="chip" style="background:#fee2e2;color:#991b1b;border-color:#fee2e2">⚠️ Damaged: ${damaged}</span>`:''}</div>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">${Object.keys(byCust).map(cid=>`<div class="card" style="display:flex;justify-content:space-between"><span style="font-size:.85rem">${esc(CUST(cid).name)}</span><span class="muted" style="font-size:.85rem">${money(byCust[cid])} credit</span></div>`).join('')}</div>`;
+}
+
+/* ===================== SETTINGS ===================== */
+route('settings',{ title:'Settings', hideFab:true,
+  render:()=>{ const u=me();
+    return `<div class="card" style="display:flex;align-items:center;gap:12px">
+        <div style="width:48px;height:48px;border-radius:999px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem">${u.firstName[0]}</div>
+        <div><div style="font-weight:600">${esc(u.name)}</div><div class="muted" style="font-size:.8rem">${esc(u.email)}</div><div class="muted" style="font-size:.78rem">${esc(state.role)}</div></div></div>
+      <div class="card" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.9rem">Sync Status</span><span class="badge" style="background:#f1f3f4;color:#5f6368">Data Storage: Local · Offline</span></div>
+      <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:8px">Role</div>
+        <div style="display:flex;gap:8px"><button class="btn ${state.role==='Sales Person'?'btn-primary':'btn-secondary'} btn-full" onclick="setRole('Sales Person')">Sales Person</button><button class="btn ${state.role==='Driver'?'btn-primary':'btn-secondary'} btn-full" onclick="setRole('Driver')">Driver</button></div>
+        <div class="muted" style="font-size:.75rem;margin-top:6px">Driver role shows the Route tab instead of Home.</div></div>
+      <div class="card" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:.9rem">Mute Notifications</span>
+        <label class="switch"><input type="checkbox" ${state.notificationsMuted?'checked':''} onchange="state.notificationsMuted=this.checked;toast(this.checked?'Notifications muted':'Notifications on')"/></label></div>
+      <button class="btn btn-danger btn-full" style="margin-top:16px" onclick="toast('Signed out (mock)','warning')">Sign Out</button>`;
+  }
+});
+function setRole(r){ state.role=r; toast('Switched to '+r); location.hash = r==='Driver'?'#route':'#home'; render(); }
+/* ===================== NOTIFICATIONS ===================== */
+route('notifications',{ title:'Notifications', hideFab:true,
+  headerRight:()=>`<button class="iconbtn" onclick="markAllRead()" title="Mark all read"><i data-lucide="check-check"></i></button>`,
+  render:()=>{ const list=NOTIFICATIONS.filter(n=>n.userId===CURRENT_USER_ID);
+    return list.length?list.map(n=>`<div class="card row-link" style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;cursor:pointer;${n.read?'':'background:#f3f8ff'}" onclick="openNotif('${n.id}')">
+      <div style="width:34px;height:34px;border-radius:999px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:0 0 auto"><i data-lucide="${n.icon}" style="width:18px;height:18px"></i></div>
+      <div style="flex:1"><div style="font-weight:600;font-size:.88rem">${esc(n.title)}</div><div class="sec" style="font-size:.8rem">${esc(n.body)}</div><div class="muted" style="font-size:.72rem;margin-top:2px">${fmtDT(n.ts)}</div></div>
+      ${n.read?'':'<div style="width:8px;height:8px;border-radius:999px;background:var(--primary);flex:0 0 auto;margin-top:6px"></div>'}</div>`).join(''):empty('bell','No notifications','');
+  }
+});
+function openNotif(id){ const n=NOTIFICATIONS.find(x=>x.id===id); n.read=true; location.hash=n.linkTo; }
+function markAllRead(){ NOTIFICATIONS.forEach(n=>{if(n.userId===CURRENT_USER_ID)n.read=true;}); toast('All marked read'); render(); }
+
+/* ===================== TASKS ===================== */
+const taskState={tab:'My Tasks',filter:'All'};
+route('tasks',{ title:'Tasks', hideFab:true,
+  render:()=>{ let list = taskState.tab==='My Tasks' ? TASKS.filter(t=>t.assigneeId===CURRENT_USER_ID) : TASKS.filter(t=>t.creatorId===CURRENT_USER_ID);
+    list=list.filter(t=>{ if(taskState.filter==='All')return true;
+      if(taskState.filter==='Overdue')return t.status!=='Done'&&daysBetween(t.dueDate,todayISO())>0;
+      return t.status===taskState.filter; });
+    const filters=['All','Open','In Progress','Done','Overdue'];
+    return `<div style="display:flex;gap:6px;margin-bottom:10px">${['My Tasks','Assigned by Me'].map(tb=>`<button class="btn ${taskState.tab===tb?'btn-primary':'btn-secondary'} btn-full" onclick="taskState.tab='${tb}';render()">${tb}</button>`).join('')}</div>
+      <div class="chips" style="margin-bottom:10px">${filters.map(f=>`<button class="chip ${taskState.filter===f?'active':''}" onclick="taskState.filter='${f}';render()">${f}</button>`).join('')}</div>
+      <div style="display:flex;flex-direction:column;gap:8px">${list.length?list.map(taskRow).join(''):empty('check-square','No tasks','')}</div>
+      <button class="fab" style="bottom:72px" onclick="openNewTask()"><i data-lucide="plus"></i></button>`;
+  }
+});
+function taskRow(t){ const overdue=t.status!=='Done'&&daysBetween(t.dueDate,todayISO())>0; const assignee=USERS.find(u=>u.id===t.assigneeId);
+  const prColor={Low:['#f1f3f4','#5f6368'],Med:['#fef7e0','#b06000'],High:['#fce8e6','#c5221f']}[t.priority];
+  return `<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="flex:1"><div style="font-weight:600;font-size:.9rem">${esc(t.title)}</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px;flex-wrap:wrap">
+          <span class="badge sm" style="background:${prColor[0]};color:${prColor[1]}">${t.priority}</span>
+          ${statusBadge(t.status)}
+          <span class="muted" style="font-size:.72rem;color:${overdue?'var(--danger)':'var(--text-muted)'}">Due ${fmtDate(t.dueDate)}</span></div>
+        <button class="chip" style="margin-top:6px" onclick="location.hash='${t.tag.link}'">${esc(t.tag.type)} · ${esc(t.tag.id)}</button></div>
+      <div style="width:28px;height:28px;border-radius:999px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.72rem;flex:0 0 auto">${(assignee?assignee.firstName[0]:'?')}</div></div>
+    ${t.status!=='Done'?`<div style="display:flex;gap:6px;margin-top:8px"><button class="btn btn-secondary" style="padding:4px 8px;font-size:.72rem" onclick="advanceTask('${t.id}')">${t.status==='Open'?'Start':'Complete'}</button><button class="btn btn-secondary" style="padding:4px 8px;font-size:.72rem" onclick="cancelTask('${t.id}')">Cancel</button></div>`:''}</div>`;
+}
+function advanceTask(id){ const t=TASKS.find(x=>x.id===id); t.status=t.status==='Open'?'In Progress':'Done'; toast('Task '+t.status.toLowerCase()); render(); }
+function cancelTask(id){ const t=TASKS.find(x=>x.id===id); t.status='Cancelled'; toast('Task cancelled','warning'); render(); }
+function openNewTask(prefillTag){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">New Task</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <input class="inp" id="ntTitle" placeholder="Title"/>
+    <textarea class="inp" id="ntDesc" rows="2" placeholder="Description"></textarea>
+    <select class="inp" id="ntAssignee">${USERS.map(u=>`<option value="${u.id}">${u.name}</option>`).join('')}</select>
+    <input class="inp" id="ntDue" type="date" value="${nextWorkingDay()}"/>
+    <select class="inp" id="ntPriority"><option>Low</option><option selected>Med</option><option>High</option></select>
+    <input class="inp" id="ntTag" placeholder="Tag record (e.g. Order · ORD-...)" value="${prefillTag?esc(prefillTag.type+' · '+prefillTag.id):''}"/>
+    <button class="btn btn-primary btn-full" onclick="saveTask('${prefillTag?prefillTag.link:''}')">Create Task</button></div>`); }
+function saveTask(link){ const title=$('#ntTitle').value.trim(); if(!title){ toast('Title required','error'); return; }
+  const tagRaw=$('#ntTag').value.split('·'); const tag={type:(tagRaw[0]||'Customer').trim(),id:(tagRaw[1]||'').trim(),link:link||'#tasks'};
+  TASKS.unshift({id:uid('t'),title,description:$('#ntDesc').value,creatorId:CURRENT_USER_ID,assigneeId:$('#ntAssignee').value,dueDate:$('#ntDue').value,priority:$('#ntPriority').value,status:'Open',tag});
+  closeOverlay(); toast('Task created'); render(); }
+
+/* ===================== PAYMENT LINKS ===================== */
+route('payment_links',{ title:'Payment Links', hideFab:true,
+  headerRight:()=>`<button class="iconbtn" onclick="openPaymentLinkForm()"><i data-lucide="plus"></i></button>`,
+  render:()=>{ return PAYMENT_LINKS.length?PAYMENT_LINKS.map(l=>{ const c=CUST(l.customerId);
+      return `<div class="card" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:600">${esc(c.name)}</span>${statusBadge(l.status)}</div>
+        <div class="muted" style="font-size:.78rem;margin-top:3px">${money(l.amount)} · ${esc(l.allocation)} · ${l.channel}</div>
+        <div class="muted" style="font-size:.72rem">Sent ${fmtDT(l.sentAt)}${l.paidAt?' · Paid '+fmtDT(l.paidAt):''}</div>
+        ${l.status!=='paid'&&l.status!=='expired'?`<button class="btn btn-secondary" style="margin-top:8px;padding:4px 10px;font-size:.75rem" onclick="markLinkPaid('${l.id}')">Mark as Paid</button>`:''}</div>`;}).join(''):empty('link','No payment links','');
+  }
+});
+function openPaymentLinkForm(custId){ const opts=CUSTOMERS.map(c=>`<option value="${c.id}" ${c.id===custId?'selected':''}>${c.name}</option>`).join('');
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Send Payment Link</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <select class="inp" id="plCust">${opts}</select>
+    <select class="inp" id="plAlloc"><option>Account Credit</option><option>Specific invoices</option><option>Specific order</option></select>
+    <input class="inp" id="plAmount" type="number" step="0.01" placeholder="Amount" value="100.00"/>
+    <select class="inp" id="plChannel"><option>Email</option><option>SMS</option></select>
+    <textarea class="inp" id="plMsg" rows="2" placeholder="Message"></textarea>
+    <button class="btn btn-primary btn-full" onclick="sendPaymentLink()">Send</button></div>`); }
+function sendPaymentLink(){ const cid=$('#plCust').value; const c=CUST(cid);
+  PAYMENT_LINKS.unshift({id:uid('pl'),customerId:cid,allocation:$('#plAlloc').value,amount:parseFloat($('#plAmount').value)||0,channel:$('#plChannel').value,message:$('#plMsg').value,status:'sent',sentAt:new Date().toISOString(),paidAt:null});
+  closeOverlay(); toast('Payment link sent to '+c.name); if(parseHash().base==='payment_links')render(); }
+function markLinkPaid(id){ const l=PAYMENT_LINKS.find(x=>x.id===id); l.status='paid'; l.paidAt=new Date().toISOString(); const c=CUST(l.customerId);
+  PAYMENTS.unshift({id:uid('pay'),customerId:c.id,amount:l.amount,method:'Card',appliedTo:[],unappliedAmount:l.amount,reference:'LINK-'+l.id,date:new Date().toISOString(),collectedBy:CURRENT_USER_ID});
+  NOTIFICATIONS.unshift({id:uid('n'),userId:CURRENT_USER_ID,icon:'dollar-sign',iconType:'payment',title:'Payment received',body:`${money(l.amount)} from ${c.name} via payment link`,ts:new Date().toISOString(),read:false,linkTo:'#payments'});
+  toast('Payment received'); render(); }
+/* ===================== DRIVER: ROUTE ===================== */
+route('route',{ root:true, title:'My Route', headerRight:()=>bellBtn(),
+  render:()=>{ const stops=ROUTE_STOPS.slice().sort((a,b)=>a.seq-b.seq);
+    return `<div class="muted" style="font-size:.8rem;margin-bottom:8px">${fmtDate(todayISO())} · ${stops.length} stops</div>
+      ${stops.map(s=>{ const o=ORD(s.orderId); const c=CUST(o.customerId);
+        return `<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#stops/${s.id}'">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span style="width:22px;height:22px;border-radius:999px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700">${s.seq}</span>
+              <span style="font-weight:600" onclick="event.stopPropagation();window.open('${mapsLink(c.address)}','_blank')">${esc(c.name)}</span></div>
+              <div class="muted" style="font-size:.75rem;margin-top:3px;padding-left:28px">${esc(c.address)}</div>
+              <div style="font-size:.78rem;margin-top:2px;padding-left:28px">${o.totalCases} cases · ${money(o.grandTotal)}</div></div>
+            ${statusBadge(s.status)}</div></div>`;}).join('')}`;
+  }
+});
+
+/* ===================== DRIVER: STOP DETAIL ===================== */
+route('stops',{ title:(ctx)=>{ const s=STOP(ctx.id); return s?CUST(ORD(s.orderId).customerId).name:'Stop'; }, hideFab:true,
+  render:(ctx)=> stopDetail(ctx.id) });
+function stopDetail(id){ const s=STOP(id); if(!s) return empty('truck','Stop not found',''); const o=ORD(s.orderId); const c=CUST(o.customerId);
+  return `<div class="card"><div style="font-weight:600">${esc(c.name)}</div>
+      <a href="${mapsLink(c.address)}" target="_blank" style="color:var(--primary);font-size:.82rem;display:block;margin-top:2px">📍 ${esc(c.address)}</a>
+      <div class="muted" style="font-size:.82rem;margin-top:4px">${esc(c.contact)} · <a href="tel:${c.phone}" style="color:var(--primary)">${esc(c.phone)}</a></div>
+      <div style="margin-top:6px">${statusBadge(s.status)}</div></div>
+    ${orderReceipt(o,{editable:false,context:'stop'})}
+    <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:8px">Delivery Actions</div>
+      ${s.status==='Pending'?`<button class="btn btn-primary btn-full" onclick="stopArrive('${id}')"><i data-lucide="map-pin"></i> Arrive</button>`:''}
+      ${s.status==='Arrived'?`<div style="display:flex;gap:8px"><button class="btn btn-full" style="background:var(--success);color:#fff" onclick="openSignature('${id}')"><i data-lucide="pen-tool"></i> Deliver</button><button class="btn btn-danger btn-full" onclick="openRefuse('${id}')">Refuse</button></div>`:''}
+      ${s.status==='Delivered'?`<div class="card" style="background:#dcfce7;color:#166534;text-align:center">✅ Delivered</div>`:''}
+      ${s.status==='Refused'?`<div class="card" style="background:#fce8e6;color:#c5221f;text-align:center">Refused${s.refuseReason?' · '+s.refuseReason:''}</div>`:''}
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary btn-full" onclick="printStandin('Delivery Receipt — ${o.orderNumber}')">🖨 Print Receipt</button><button class="btn btn-secondary btn-full" onclick="toast('Shared')"><i data-lucide="share-2"></i> Share</button></div>
+    <div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:8px">Quick Links</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-secondary" onclick="startNewOrder('${c.id}')">➕ New Order</button>
+        <button class="btn btn-secondary" onclick="startPayment('${c.id}')">💲 Collect Payment</button>
+        <button class="btn btn-secondary" onclick="startReturnFromOrder('${o.id}')">↩ Return</button>
+        <button class="btn btn-secondary" onclick="openSendMessage('${c.id}',true)">📄 Balance Report</button></div></div>`;
+}
+function stopArrive(id){ STOP(id).status='Arrived'; toast('Marked as arrived'); render(); }
+function openSignature(id){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Capture Signature</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <canvas id="sigCanvas" width="340" height="160" style="border:1px solid var(--border);border-radius:8px;width:100%;touch-action:none;background:#fff"></canvas>
+  <div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-secondary btn-full" onclick="clearSig()">Clear</button><button class="btn btn-primary btn-full" onclick="saveSig('${id}')">Save & Confirm</button></div>`);
+  setTimeout(()=>initSig(),50); }
+function initSig(){ const cv=$('#sigCanvas'); if(!cv)return; const ctx=cv.getContext('2d'); ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#202124'; let drawing=false;
+  const pos=e=>{ const r=cv.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return {x:(t.clientX-r.left)*(cv.width/r.width),y:(t.clientY-r.top)*(cv.height/r.height)}; };
+  const start=e=>{drawing=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault();};
+  const move=e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();};
+  const end=()=>{drawing=false;};
+  cv.addEventListener('mousedown',start);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',end);
+  cv.addEventListener('touchstart',start);cv.addEventListener('touchmove',move);cv.addEventListener('touchend',end); }
+function clearSig(){ const cv=$('#sigCanvas'); if(cv)cv.getContext('2d').clearRect(0,0,cv.width,cv.height); }
+function saveSig(id){ const s=STOP(id); s.status='Delivered'; const o=ORD(s.orderId); o.status='Delivered';
+  if(!INVOICES.some(i=>i.orderId===o.id)){ const inv=makeInvoice({id:uid('i'),invoiceNumber:'INV-'+todayISO().replace(/-/g,'')+'-'+String(INVOICES.length+1).padStart(3,'0'),orderId:o.id,customerId:o.customerId,status:'Open',lineItems:o.lineItems,amountPaid:0,dueDate:nextWorkingDay(),createdDate:todayISO(),paidDate:null}); INVOICES.push(inv); }
+  closeOverlay(); toast('Delivered — invoice created'); render(); }
+function openRefuse(id){ openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Refuse Delivery</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+  <div style="font-size:.8rem;margin-bottom:6px">Reason</div><select class="inp" id="refReason">${REFUSE_REASONS.map(r=>`<option>${r}</option>`).join('')}</select>
+  <button class="btn btn-danger btn-full" style="margin-top:12px" onclick="doRefuse('${id}')">Confirm Refusal</button>`); }
+function doRefuse(id){ const s=STOP(id); s.status='Refused'; s.refuseReason=$('#refReason').value; closeOverlay(); toast('Delivery refused','warning'); render(); }
+
+/* ===================== INIT ===================== */
+if(!location.hash) location.hash='#home';
+render();
+</script>
+</body>
+</html>
