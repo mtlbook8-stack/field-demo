@@ -46,14 +46,16 @@
   .page{padding:16px;padding-bottom:88px;animation:fadeIn .2s}
   /* Bottom nav */
   .bnav{height:56px;flex:0 0 56px;background:#fff;border-top:1px solid var(--border);
-    display:flex;z-index:100}
+    display:flex;align-items:center;z-index:100}
   .bnav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.625rem}
+    background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:.625rem;height:100%}
   .bnav button.active{color:var(--primary)}
-  .fab{position:absolute;right:16px;bottom:72px;width:56px;height:56px;border-radius:999px;
-    background:var(--primary);color:#fff;border:none;display:flex;align-items:center;justify-content:center;
-    box-shadow:var(--sh-md);z-index:99;cursor:pointer}
-  .fab:active{transform:scale(.92)}
+  .bnav .nav-add{flex:0 0 56px;width:56px;height:48px;border-radius:999px;
+    background:var(--primary);color:#fff;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(66,133,244,.5);cursor:pointer;position:relative;top:-10px;font-size:.625rem;gap:2px}
+  .bnav .nav-add:active{transform:scale(.92)}
+  /* legacy FAB hidden */
+  .fab{display:none!important}
   /* Cards & buttons */
   .card{background:var(--bg-card);border-radius:12px;box-shadow:var(--sh-sm);padding:16px}
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:8px 16px;border-radius:8px;
@@ -110,7 +112,6 @@
   <div id="app">
     <header class="pheader" id="pheader"></header>
     <div id="scroll"><div id="view"></div></div>
-    <button class="fab" id="fab" onclick="location.hash='#orders/new'"><i data-lucide="plus"></i></button>
     <nav class="bnav" id="bnav"></nav>
   </div>
   <div id="toast-wrap"></div>
@@ -199,17 +200,17 @@ const PRODUCTS = [
 const PROD = id => PRODUCTS.find(p=>p.id===id);
 const CAT = id => CATEGORIES.find(c=>c.id===id);
 const CUSTOMERS = [
-  {id:'cu1',name:'Bella Italia Restaurant',code:'BELL-001',contact:'Tony Bellini',phone:'212-555-0101',email:'orders@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:1240.50,creditLimit:5000,terms:'NET-30',address:'120 Mulberry St, New York, NY 10013',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-28',avgOrderCases:32,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prefers Tuesday deliveries. Call ahead.',date:'2026-04-10T10:00:00'}],parentId:null,isBranch:false,createdDate:'2024-02-15',savedPaymentMethods:[{id:'pm1',type:'credit_card',last4:'4242',brand:'Visa',expiry:'12/27',isDefault:true}]},
-  {id:'cu2',name:'Corner Deli & Grocery',code:'CORN-002',contact:'Sam Park',phone:'718-555-0144',email:'sam@cornerdeli.example',type:'Deli',paymentType:'credit',creditTier:'B',balance:3890.00,creditLimit:4000,terms:'NET-15',address:'880 Atlantic Ave, Brooklyn, NY 11238',billingAddress:'880 Atlantic Ave, Brooklyn, NY 11238',priceLevel:'B',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-30',avgOrderCases:18,accountCredit:50.00,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2023-11-02',savedPaymentMethods:[{id:'pm2',type:'ach',last4:'8891',brand:'Chase',expiry:'',isDefault:true}]},
-  {id:'cu3',name:'Sunrise Caterers',code:'SUNR-003',contact:'Lena Ortiz',phone:'917-555-0188',email:'events@sunrisecater.example',type:'Caterer',paymentType:'credit',creditTier:'A',balance:0,creditLimit:8000,terms:'NET-30',address:'45 Hudson St, Jersey City, NJ 07302',billingAddress:'45 Hudson St, Jersey City, NJ 07302',priceLevel:'A',route:'Route 3 — NJ',status:'Active',lastOrderDate:'2026-05-20',avgOrderCases:55,accountCredit:120.00,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2022-06-19',savedPaymentMethods:[]},
-  {id:'cu4',name:'Java House Cafe',code:'JAVA-004',contact:'Mike Chen',phone:'646-555-0170',email:'mike@javahouse.example',type:'Cafe',paymentType:'prepaid',creditTier:null,balance:210.00,creditLimit:0,terms:'Prepaid',address:'300 Bedford Ave, Brooklyn, NY 11211',billingAddress:'300 Bedford Ave, Brooklyn, NY 11211',priceLevel:'C',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-31',avgOrderCases:9,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prepaid only. No credit.',date:'2026-01-05T09:00:00'}],parentId:null,isBranch:false,createdDate:'2025-01-22',savedPaymentMethods:[{id:'pm3',type:'credit_card',last4:'1881',brand:'Mastercard',expiry:'08/26',isDefault:true}]},
-  {id:'cu5',name:'Grand Plaza Hotel',code:'GRAN-005',contact:'Patricia Wells',phone:'212-555-0199',email:'fnb@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:6420.75,creditLimit:15000,terms:'NET-30',address:'768 5th Ave, New York, NY 10019',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-29',avgOrderCases:88,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2021-03-30',savedPaymentMethods:[{id:'pm4',type:'credit_card',last4:'9003',brand:'Amex',expiry:'04/28',isDefault:true},{id:'pm5',type:'ach',last4:'2210',brand:'Citi',expiry:'',isDefault:false}]},
-  {id:'cu6',name:'Maple Street Bakery',code:'MAPL-006',contact:'Grace Liu',phone:'347-555-0122',email:'grace@maplebakery.example',type:'Bakery',paymentType:'credit',creditTier:'C',balance:980.00,creditLimit:1000,terms:'NET-15',address:'52 Maple St, Queens, NY 11375',billingAddress:'52 Maple St, Queens, NY 11375',priceLevel:'B',route:'Route 4 — Queens',status:'Hold',lastOrderDate:'2026-04-15',avgOrderCases:7,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'On hold — balance near limit.',date:'2026-05-01T12:00:00'}],parentId:null,isBranch:false,createdDate:'2024-08-11',savedPaymentMethods:[]},
-  {id:'cu7',name:'The Tap Room',code:'TAPR-007',contact:'Dan Murphy',phone:'212-555-0166',email:'dan@taproom.example',type:'Bar',paymentType:'credit',creditTier:'B',balance:2150.00,creditLimit:6000,terms:'NET-30',address:'14 Stone St, New York, NY 10004',billingAddress:'14 Stone St, New York, NY 10004',priceLevel:'B',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-27',avgOrderCases:24,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2023-05-14',savedPaymentMethods:[{id:'pm6',type:'credit_card',last4:'7777',brand:'Visa',expiry:'11/27',isDefault:true}]},
-  {id:'cu8',name:'Fresh Market Grocery',code:'FRES-008',contact:'Omar Haddad',phone:'718-555-0133',email:'omar@freshmarket.example',type:'Grocery',paymentType:'credit',creditTier:'A',balance:0,creditLimit:10000,terms:'NET-30',address:'200 Steinway St, Queens, NY 11103',billingAddress:'200 Steinway St, Queens, NY 11103',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-06-01',avgOrderCases:64,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2020-09-08',savedPaymentMethods:[{id:'pm7',type:'ach',last4:'5540',brand:'Chase',expiry:'',isDefault:true}]},
+  {id:'cu1',name:'Bella Italia Restaurant',code:'BELL-001',contact:'Tony Bellini',phone:'212-555-0101',email:'orders@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:1240.50,creditLimit:5000,terms:'NET-30',address:'120 Mulberry St, New York, NY 10013',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-28',avgOrderCases:32,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prefers Tuesday deliveries. Call ahead.',date:'2026-04-10T10:00:00'}],parentId:null,isBranch:false,createdDate:'2024-02-15',savedPaymentMethods:[{id:'pm1',type:'credit_card',last4:'4242',brand:'Visa',expiry:'12/27',isDefault:true}],savedAddresses:[]},
+  {id:'cu2',name:'Corner Deli & Grocery',code:'CORN-002',contact:'Sam Park',phone:'718-555-0144',email:'sam@cornerdeli.example',type:'Deli',paymentType:'credit',creditTier:'B',balance:3890.00,creditLimit:4000,terms:'NET-15',address:'880 Atlantic Ave, Brooklyn, NY 11238',billingAddress:'880 Atlantic Ave, Brooklyn, NY 11238',priceLevel:'B',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-30',avgOrderCases:18,accountCredit:50.00,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2023-11-02',savedPaymentMethods:[{id:'pm2',type:'ach',last4:'8891',brand:'Chase',expiry:'',isDefault:true}],savedAddresses:[]},
+  {id:'cu3',name:'Sunrise Caterers',code:'SUNR-003',contact:'Lena Ortiz',phone:'917-555-0188',email:'events@sunrisecater.example',type:'Caterer',paymentType:'credit',creditTier:'A',balance:0,creditLimit:8000,terms:'NET-30',address:'45 Hudson St, Jersey City, NJ 07302',billingAddress:'45 Hudson St, Jersey City, NJ 07302',priceLevel:'A',route:'Route 3 — NJ',status:'Active',lastOrderDate:'2026-05-20',avgOrderCases:55,accountCredit:120.00,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2022-06-19',savedPaymentMethods:[],savedAddresses:[{id:'sa1',label:'Event at Javits Center',address:'655 W 34th St, New York, NY 10001'},{id:'sa2',label:'Brooklyn Navy Yard Event',address:'63 Flushing Ave, Brooklyn, NY 11205'}]},
+  {id:'cu4',name:'Java House Cafe',code:'JAVA-004',contact:'Mike Chen',phone:'646-555-0170',email:'mike@javahouse.example',type:'Cafe',paymentType:'prepaid',creditTier:null,balance:210.00,creditLimit:0,terms:'Prepaid',address:'300 Bedford Ave, Brooklyn, NY 11211',billingAddress:'300 Bedford Ave, Brooklyn, NY 11211',priceLevel:'C',route:'Route 2 — Brooklyn',status:'Active',lastOrderDate:'2026-05-31',avgOrderCases:9,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'Prepaid only. No credit.',date:'2026-01-05T09:00:00'}],parentId:null,isBranch:false,createdDate:'2025-01-22',savedPaymentMethods:[{id:'pm3',type:'credit_card',last4:'1881',brand:'Mastercard',expiry:'08/26',isDefault:true}],savedAddresses:[]},
+  {id:'cu5',name:'Grand Plaza Hotel',code:'GRAN-005',contact:'Patricia Wells',phone:'212-555-0199',email:'fnb@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:6420.75,creditLimit:15000,terms:'NET-30',address:'768 5th Ave, New York, NY 10019',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-29',avgOrderCases:88,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2021-03-30',savedPaymentMethods:[{id:'pm4',type:'credit_card',last4:'9003',brand:'Amex',expiry:'04/28',isDefault:true},{id:'pm5',type:'ach',last4:'2210',brand:'Citi',expiry:'',isDefault:false}],savedAddresses:[{id:'sa3',label:'Rooftop Venue',address:'768 5th Ave Rooftop, New York, NY 10019'}]},
+  {id:'cu6',name:'Maple Street Bakery',code:'MAPL-006',contact:'Grace Liu',phone:'347-555-0122',email:'grace@maplebakery.example',type:'Bakery',paymentType:'credit',creditTier:'C',balance:980.00,creditLimit:1000,terms:'NET-15',address:'52 Maple St, Queens, NY 11375',billingAddress:'52 Maple St, Queens, NY 11375',priceLevel:'B',route:'Route 4 — Queens',status:'Hold',lastOrderDate:'2026-04-15',avgOrderCases:7,accountCredit:0,assignedSalesperson:'u1',notes:[{text:'On hold — balance near limit.',date:'2026-05-01T12:00:00'}],parentId:null,isBranch:false,createdDate:'2024-08-11',savedPaymentMethods:[],savedAddresses:[]},
+  {id:'cu7',name:'The Tap Room',code:'TAPR-007',contact:'Dan Murphy',phone:'212-555-0166',email:'dan@taproom.example',type:'Bar',paymentType:'credit',creditTier:'B',balance:2150.00,creditLimit:6000,terms:'NET-30',address:'14 Stone St, New York, NY 10004',billingAddress:'14 Stone St, New York, NY 10004',priceLevel:'B',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-27',avgOrderCases:24,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:null,isBranch:false,createdDate:'2023-05-14',savedPaymentMethods:[{id:'pm6',type:'credit_card',last4:'7777',brand:'Visa',expiry:'11/27',isDefault:true}],savedAddresses:[]},
+  {id:'cu8',name:'Fresh Market Grocery',code:'FRES-008',contact:'Omar Haddad',phone:'718-555-0133',email:'omar@freshmarket.example',type:'Grocery',paymentType:'credit',creditTier:'A',balance:0,creditLimit:10000,terms:'NET-30',address:'200 Steinway St, Queens, NY 11103',billingAddress:'200 Steinway St, Queens, NY 11103',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-06-01',avgOrderCases:64,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:null,isBranch:false,createdDate:'2020-09-08',savedPaymentMethods:[{id:'pm7',type:'ach',last4:'5540',brand:'Chase',expiry:'',isDefault:true}],savedAddresses:[]},
   // Branches
-  {id:'cu1b',name:'Bella Italia — Midtown',code:'BELL-001-B',contact:'Rosa Bellini',phone:'212-555-0102',email:'midtown@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'455 W 51st St, New York, NY 10019',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-22',avgOrderCases:14,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:'cu1',isBranch:true,createdDate:'2024-09-01',savedPaymentMethods:[]},
-  {id:'cu5b',name:'Grand Plaza — Airport',code:'GRAN-005-B',contact:'Leo Park',phone:'718-555-0200',email:'airport@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'1 Terminal Dr, Queens, NY 11430',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-05-18',avgOrderCases:40,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:'cu5',isBranch:true,createdDate:'2023-02-12',savedPaymentMethods:[]},
+  {id:'cu1b',name:'Bella Italia — Midtown',code:'BELL-001-B',contact:'Rosa Bellini',phone:'212-555-0102',email:'midtown@bellaitalia.example',type:'Restaurant',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'455 W 51st St, New York, NY 10019',billingAddress:'120 Mulberry St, New York, NY 10013',priceLevel:'A',route:'Route 1 — Downtown',status:'Active',lastOrderDate:'2026-05-22',avgOrderCases:14,accountCredit:0,assignedSalesperson:'u1',notes:[],parentId:'cu1',isBranch:true,createdDate:'2024-09-01',savedPaymentMethods:[],savedAddresses:[]},
+  {id:'cu5b',name:'Grand Plaza — Airport',code:'GRAN-005-B',contact:'Leo Park',phone:'718-555-0200',email:'airport@grandplaza.example',type:'Hotel',paymentType:'credit',creditTier:'A',balance:0,creditLimit:0,terms:'NET-30',address:'1 Terminal Dr, Queens, NY 11430',billingAddress:'768 5th Ave, New York, NY 10019',priceLevel:'A',route:'Route 4 — Queens',status:'Active',lastOrderDate:'2026-05-18',avgOrderCases:40,accountCredit:0,assignedSalesperson:'u2',notes:[],parentId:'cu5',isBranch:true,createdDate:'2023-02-12',savedPaymentMethods:[],savedAddresses:[]},
 ];
 const CUST = id => CUSTOMERS.find(c=>c.id===id);
 const billCust = c => c.isBranch && c.parentId ? CUST(c.parentId) : c;
@@ -427,9 +428,6 @@ function render(){
   view.innerHTML = `<div class="page">${out}</div>`;
   renderHeader(cfg, ctx);
   renderNav(base);
-  // FAB visibility
-  const hideFab = cfg.hideFab || state.role!=='Sales Person' && false;
-  $('#fab').style.display = cfg.hideFab ? 'none':'flex';
   $('#scroll').scrollTop=0;
   icons();
   if(cfg.after) cfg.after(ctx);
@@ -454,24 +452,51 @@ function bellBtn(){
     ${c>0?`<span style="position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${c}</span>`:''}
   </button>`;
 }
+function hamBtn(){
+  const tot=(unreadCount()||0)+(openTasks().length||0)+(pendingLinks().length||0);
+  return `<button class="iconbtn" onclick="openMoreMenu()" style="position:relative">
+    <i data-lucide="menu"></i>
+    ${tot>0?`<span style="position:absolute;top:4px;right:4px;background:var(--danger);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${tot}</span>`:''}
+  </button>`;
+}
 
 function renderNav(base){
   const nav=$('#bnav');
   const first = state.role==='Driver' ? {id:'route',label:'Route',icon:'truck',hash:'#route'} : {id:'home',label:'Home',icon:'home',hash:'#home'};
-  const tabs=[ first,
-    {id:'customers',label:'Customers',icon:'users',hash:'#customers'},
-    {id:'orders',label:'Orders',icon:'shopping-bag',hash:'#orders'},
-    {id:'pay',label:'Pay',icon:'dollar-sign',hash:'#payments'},
-    {id:'reports',label:'Reports',icon:'bar-chart-2',hash:'#reports'},
-  ];
-  const activeMap={home:'home',route:'route',customers:'customers',orders:'orders',payments:'pay',reports:'reports'};
+  const left=[first, {id:'customers',label:'Customers',icon:'users',hash:'#customers'}];
+  const right=[{id:'orders',label:'Orders',icon:'shopping-bag',hash:'#orders'},{id:'pay',label:'Pay',icon:'dollar-sign',hash:'#payments'}];
+  const activeMap={home:'home',route:'route',customers:'customers',orders:'orders',payments:'pay'};
   const active=activeMap[base]||'';
-  nav.innerHTML = tabs.map(t=>`<button class="${active===t.id?'active':''}" onclick="location.hash='${t.hash}'">
-    <i data-lucide="${t.icon}" style="width:22px;height:22px"></i><span>${t.label}</span></button>`).join('');
+  const tab=t=>`<button class="${active===t.id?'active':''}" onclick="location.hash='${t.hash}'">
+    <i data-lucide="${t.icon}" style="width:22px;height:22px"></i><span>${t.label}</span></button>`;
+  nav.innerHTML = left.map(tab).join('')+
+    `<button class="nav-add" onclick="location.hash='#orders/new'"><i data-lucide="plus" style="width:24px;height:24px"></i></button>`+
+    right.map(tab).join('');
   icons();
+}
+function openMoreMenu(){
+  const item=(emoji,label,hash,badge)=>`<button class="card row-link" onclick="closeOverlay();location.hash='${hash}'" style="display:flex;align-items:center;gap:14px;border:none;width:100%;text-align:left;cursor:pointer;padding:14px 16px">
+    <span style="font-size:1.3rem;width:28px;text-align:center">${emoji}</span>
+    <span style="flex:1;font-size:.95rem;font-weight:500">${label}</span>
+    ${badge?`<span style="background:var(--danger);color:#fff;border-radius:999px;font-size:.65rem;min-width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;padding:0 4px">${badge}</span>`:''}
+    <i data-lucide="chevron-right" style="width:16px;height:16px;color:var(--text-muted)"></i></button>`;
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <h3 style="margin:0">More</h3><button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    <div class="divide">
+      ${item('📊','Reports','#reports','')}
+      ${item('🔔','Notifications','#notifications',unreadCount()||'')}
+      ${item('✅','Tasks','#tasks',openTasks().length||'')}
+      ${item('🔗','Payment Links','#payment_links',pendingLinks().length||'')}
+      ${item('↩','Returns','#returns','')}
+      ${item('⚙️','Settings','#settings','')}
+    </div>`);
 }
 
 window.addEventListener('hashchange', render);
+// Auto-select field content on focus so default values don't need manual clearing
+document.addEventListener('focus', e=>{
+  if(e.target.matches('input:not([type=checkbox]):not([type=radio]):not([type=range]), textarea')) e.target.select();
+}, true);
 /* ===================== HOME ===================== */
 function greeting(){ const h=new Date().getHours(); return h<12?'Good morning':h<18?'Good afternoon':'Good evening'; }
 const ALERTS = [
@@ -481,7 +506,7 @@ const ALERTS = [
 ];
 let homeAlertsOpen=false;
 route('home',{ root:true, title:()=>`${greeting()}, ${me().firstName}`,
-  headerRight:()=>`${bellBtn()}<button class="iconbtn" onclick="location.hash='#settings'"><i data-lucide="settings"></i></button>`,
+  headerRight:()=>`${bellBtn()}${hamBtn()}`,
   render:()=>{
     const casesToday=ORDERS.filter(o=>o.deliveryDate===todayISO()).reduce((s,o)=>s+o.totalCases,0);
     const openOrders=ORDERS.filter(o=>['Submitted','Picking'].includes(o.status)).length;
@@ -523,7 +548,9 @@ route('home',{ root:true, title:()=>`${greeting()}, ${me().firstName}`,
 });
 function toggleHomeAlerts(){ homeAlertsOpen=!homeAlertsOpen; render(); }
 /* ===================== CUSTOMERS LIST ===================== */
-const custFilter={q:'',chip:'All'};
+const custFilter={q:'',chip:'All',sort:'az',dir:'asc',types:new Set(),regions:new Set()};
+const CUST_TYPES=[...new Set(CUSTOMERS.map(c=>c.type))].sort();
+const CUST_REGIONS=[...new Set(CUSTOMERS.map(c=>c.route))].sort();
 function custMatchesChip(c){
   switch(custFilter.chip){
     case 'Active': return c.status==='Active';
@@ -534,27 +561,85 @@ function custMatchesChip(c){
     default: return true;
   }
 }
+function applyCustFilters(){
+  const q=custFilter.q.toLowerCase();
+  const d=custFilter.dir==='asc'?1:-1;
+  let list=CUSTOMERS.filter(custMatchesChip)
+    .filter(c=>!custFilter.types.size||custFilter.types.has(c.type))
+    .filter(c=>!custFilter.regions.size||custFilter.regions.has(c.route))
+    .filter(c=>!q||c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q));
+  switch(custFilter.sort){
+    case 'balance':   list.sort((a,b)=>d*(a.balance-b.balance)); break;
+    case 'lastorder': list.sort((a,b)=>d*(a.lastOrderDate||'').localeCompare(b.lastOrderDate||'')); break;
+    case 'frequency': list.sort((a,b)=>d*(a.avgOrderCases-b.avgOrderCases)); break;
+    case 'region':    list.sort((a,b)=>d*a.route.localeCompare(b.route)); break;
+    case 'proximity': list.sort((a,b)=>d*a.route.localeCompare(b.route)); break;
+    default:          list.sort((a,b)=>d*a.name.localeCompare(b.name));
+  }
+  return list;
+}
+function custActiveFilterCount(){ return custFilter.types.size+(state.role==='Driver'?custFilter.regions.size:0); }
+function openCustFilterSheet(){
+  const fc=custActiveFilterCount();
+  const isDriver=state.role==='Driver';
+  openSheet(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:1.125rem;font-weight:600">Filters</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${fc?`<button class="btn btn-secondary" style="padding:4px 10px;font-size:.8rem" onclick="custFilter.types.clear();custFilter.regions.clear();closeOverlay();render()">Clear all</button>`:''}
+        <button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button>
+      </div>
+    </div>
+    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Type</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:${isDriver?16:20}px">
+      ${CUST_TYPES.map(t=>`<button id="ft_${t}" class="chip ${custFilter.types.has(t)?'active':''}" onclick="custFilter.types.has('${t}')?custFilter.types.delete('${t}'):custFilter.types.add('${t}');this.classList.toggle('active')">${t}</button>`).join('')}
+    </div>
+    ${isDriver?`<div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Route</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
+      ${CUST_REGIONS.map(r=>`<button class="chip ${custFilter.regions.has(r)?'active':''}" onclick="custFilter.regions.has('${r}')?custFilter.regions.delete('${r}'):custFilter.regions.add('${r}');this.classList.toggle('active')">${esc(r)}</button>`).join('')}
+    </div>`:''}
+    <button class="btn btn-primary btn-full btn-lg" onclick="closeOverlay();render()">Apply Filters${custActiveFilterCount()?` (${custActiveFilterCount()})`:''}</button>`);
+}
 route('customers',{ root:true, title:'Customers',
   headerRight:()=>`<button class="iconbtn" onclick="openAddCustomer()" title="Add Customer"><i data-lucide="user-plus"></i></button>`,
   render:()=>{
     const chips=['All','Active','Hold','Overdue','Prepaid','Credit'];
-    let list=CUSTOMERS.filter(custMatchesChip).filter(c=>{
-      const q=custFilter.q.toLowerCase(); if(!q) return true;
-      return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q);
-    }).sort((a,b)=>a.name.localeCompare(b.name));
-    // Driver de-emphasis
+    const list=applyCustFilters();
     const stopCustIds=new Set(ROUTE_STOPS.map(s=>ORD(s.orderId).customerId));
+    const fc=custActiveFilterCount();
+    const dirIcon=custFilter.dir==='asc'?'arrow-up':'arrow-down';
     return `
     <input class="inp" placeholder="Search customers..." value="${esc(custFilter.q)}" oninput="custFilter.q=this.value;rerenderList()" />
-    <div class="chips" style="margin-top:12px">${chips.map(ch=>`<button class="chip ${custFilter.chip===ch?'active':''}" onclick="custFilter.chip='${ch}';render()">${ch}</button>`).join('')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <select class="inp" style="flex:1;padding:6px 8px;font-size:.8rem" onchange="custFilter.sort=this.value;render()">
+        <option value="az"        ${custFilter.sort==='az'       ?'selected':''}>A → Z</option>
+        <option value="balance"   ${custFilter.sort==='balance'  ?'selected':''}>Open Balance</option>
+        <option value="lastorder" ${custFilter.sort==='lastorder'?'selected':''}>Last Order</option>
+        <option value="frequency" ${custFilter.sort==='frequency'?'selected':''}>Frequency</option>
+        ${state.role==='Driver'?`
+        <option value="region"    ${custFilter.sort==='region'   ?'selected':''}>Region</option>
+        <option value="proximity" ${custFilter.sort==='proximity'?'selected':''}>Proximity</option>`:''}
+      </select>
+      <button class="iconbtn" title="Toggle direction" style="border:1px solid var(--border);border-radius:8px;width:36px;height:36px;flex:0 0 36px" onclick="custFilter.dir=custFilter.dir==='asc'?'desc':'asc';render()">
+        <i data-lucide="${dirIcon}" style="width:16px;height:16px"></i>
+      </button>
+      <button class="btn btn-secondary" style="padding:6px 10px;font-size:.8rem;position:relative;white-space:nowrap;flex:0 0 auto" onclick="openCustFilterSheet()">
+        <i data-lucide="sliders-horizontal" style="width:15px;height:15px"></i> Filters
+        ${fc?`<span style="position:absolute;top:-4px;right:-4px;background:var(--primary);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${fc}</span>`:''}
+      </button>
+    </div>
+    <div class="chips" style="margin-top:10px">${chips.map(ch=>`<button class="chip ${custFilter.chip===ch?'active':''}" onclick="custFilter.chip='${ch}';render()">${ch}</button>`).join('')}</div>
+    ${fc?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+      ${[...custFilter.types].map(t=>`<span class="chip active" style="font-size:.75rem;padding:4px 8px">${t} <span onclick="custFilter.types.delete('${t}');render()" style="margin-left:4px;cursor:pointer;opacity:.8">×</span></span>`).join('')}
+      ${state.role==='Driver'?[...custFilter.regions].map(r=>`<span class="chip active" style="font-size:.75rem;padding:4px 8px;background:#1557b0">${esc(r)} <span onclick="custFilter.regions.delete('${r}');render()" style="margin-left:4px;cursor:pointer;opacity:.8">×</span></span>`).join(''):''}
+    </div>`:''}
     <div id="custList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
       ${list.length?list.map(c=>custRow(c, state.role==='Driver'&&!stopCustIds.has(c.id))).join(''):empty('users','No customers','No customers match your filters.')}
     </div>`;
   }
 });
 function rerenderList(){
-  const q=custFilter.q.toLowerCase();
-  let list=CUSTOMERS.filter(custMatchesChip).filter(c=>!q||c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  const list=applyCustFilters();
   const stopCustIds=new Set(ROUTE_STOPS.map(s=>ORD(s.orderId).customerId));
   const el=$('#custList'); if(el){ el.innerHTML=list.length?list.map(c=>custRow(c,state.role==='Driver'&&!stopCustIds.has(c.id))).join(''):empty('users','No customers','No customers match your filters.'); icons(); }
 }
@@ -610,7 +695,7 @@ renderHeader = function(cfg, ctx){
 function customerProfile(id){
   const c=CUST(id); if(!c) return empty('user','Customer not found','');
   const parent=c.isBranch?CUST(c.parentId):null;
-  const tabs=[['Overview','user'],['Orders','shopping-bag'],['Invoices','file-text'],['Payments','wallet'],['Account','credit-card'],['Branches','git-branch'],['Notes','sticky-note']]
+  const tabs=[['Overview','user'],['Orders','shopping-bag'],['Invoices','file-text'],['Payments','wallet'],['Statement','scroll'],['Account','credit-card'],['Branches','git-branch'],['Notes','sticky-note']]
     .filter(t=>!(t[0]==='Branches'&&c.isBranch));
   if(profileTab==='Branches'&&c.isBranch) profileTab='Overview';
   const crumb = c.isBranch
@@ -639,14 +724,9 @@ function profileTabBody(c){
       <div style="display:flex;justify-content:space-between"><span class="mono" style="font-weight:600">${o.orderNumber}</span>${statusBadge(o.status)}</div>
       <div class="muted" style="font-size:.8rem;margin-top:4px">${fmtDate(o.createdDate)} · ${o.totalCases} cases · ${money(o.grandTotal)}</div></div>`).join(''):empty('shopping-bag','No orders yet','');
   }
-  if(profileTab==='Invoices'){ const list=INVOICES.filter(i=>i.customerId===c.id);
-    return list.length?list.map(i=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#orders'">
-      <div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-weight:600">${i.invoiceNumber}</span>${statusBadge(i.status)}</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        <span class="muted" style="font-size:.8rem">Due ${fmtDate(i.dueDate)} · ${money(i.amountDue)} due</span>
-        <button class="iconbtn" onclick="event.stopPropagation();toast('Invoice emailed to '+'${esc(c.email)}')"><i data-lucide="mail"></i></button></div></div>`).join(''):empty('file-text','No invoices','');
-  }
+  if(profileTab==='Invoices') return invoicesTab(c);
   if(profileTab==='Payments') return paymentsTab(c);
+  if(profileTab==='Statement') return statementTab(c);
   if(profileTab==='Account') return accountTab(c);
   if(profileTab==='Branches'){ const branches=CUSTOMERS.filter(b=>b.parentId===c.id);
     return `${branches.length?branches.map(b=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer" onclick="location.hash='#customers/${b.id}'">
@@ -691,6 +771,139 @@ function overviewTab(c){
     ${recentOrders.map(o=>`<div class="row-link" style="display:flex;justify-content:space-between;padding:6px 0;cursor:pointer" onclick="location.hash='#orders/${o.id}'"><span class="mono" style="font-size:.85rem">${o.orderNumber}</span><span style="font-size:.85rem">${money(o.grandTotal)}</span></div>`).join('')}</div>`:''}
   ${openInv.length?`<div class="card" style="margin-top:10px"><div style="font-weight:600;margin-bottom:6px">Open Invoices</div>
     ${openInv.map(i=>`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:.85rem"><span class="mono">${i.invoiceNumber}</span><span>${money(i.amountDue)} · due ${fmtDate(i.dueDate)}</span></div>`).join('')}</div>`:''}`;
+}
+/* invoices tab state */
+const invFilter={openOnly:false};
+function invoicesTab(c){
+  const all=INVOICES.filter(i=>i.customerId===c.id).sort((a,b)=>a.dueDate.localeCompare(b.dueDate));
+  const list=invFilter.openOnly?all.filter(i=>i.status!=='Paid'):all;
+  const openCount=all.filter(i=>i.status!=='Paid').length;
+  return `
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span class="muted" style="font-size:.8rem">${list.length} invoice${list.length!==1?'s':''} · ${openCount} open</span>
+    <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;cursor:pointer">
+      <div onclick="invFilter.openOnly=!invFilter.openOnly;render()" style="width:36px;height:20px;border-radius:10px;background:${invFilter.openOnly?'var(--primary)':'#ccc'};position:relative;transition:background .15s;cursor:pointer">
+        <div style="position:absolute;top:2px;left:${invFilter.openOnly?'18':'2'}px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s"></div></div>
+      Open only
+    </label>
+  </div>
+  ${list.length?list.map(i=>`<div class="card" style="margin-bottom:8px">
+    <div style="display:flex;justify-content:space-between;align-items:center"><span class="mono" style="font-weight:600">${i.invoiceNumber}</span>${statusBadge(i.status)}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+      <div>
+        <div style="font-size:.8rem">Due ${fmtDate(i.dueDate)}</div>
+        <div style="font-size:.8rem;margin-top:2px">Total ${money(i.grandTotal)} · <span style="color:${i.amountDue>0?'var(--danger)':'var(--success)'};font-weight:600">${money(i.amountDue)} due</span></div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="iconbtn" title="Email invoice" onclick="toast('Invoice emailed to ${esc(c.email)}')"><i data-lucide="mail"></i></button>
+        <button class="iconbtn" title="Print" onclick="toast('Printing…')"><i data-lucide="printer"></i></button>
+      </div>
+    </div>
+    ${i.status!=='Paid'?`<button class="btn btn-primary" style="margin-top:8px;padding:5px 12px;font-size:.8rem" onclick="startPayment('${c.id}')">Collect Payment</button>`:''}
+  </div>`).join(''):empty('file-text',invFilter.openOnly?'No open invoices':'No invoices','')}`;
+}
+/* statement tab state */
+const stmtState={from:'',to:'',type:'open_balance',preset:''};
+function stmtSetPreset(key){
+  const today=todayISO();
+  const d=n=>{ const dt=new Date('2026-06-04'); dt.setDate(dt.getDate()+n); return dt.toISOString().slice(0,10); };
+  stmtState.preset=key;
+  switch(key){
+    case '30d':  stmtState.from=d(-30);  stmtState.to=today; break;
+    case '60d':  stmtState.from=d(-60);  stmtState.to=today; break;
+    case '90d':  stmtState.from=d(-90);  stmtState.to=today; break;
+    case 'mtd':  stmtState.from='2026-06-01'; stmtState.to=today; break;
+    case 'lm':   stmtState.from='2026-05-01'; stmtState.to='2026-05-31'; break;
+    case 'ytd':  stmtState.from='2026-01-01'; stmtState.to=today; break;
+    case 'ly':   stmtState.from='2025-01-01'; stmtState.to='2025-12-31'; break;
+  }
+  render();
+}
+function statementTab(c){
+  // default preset: This Month
+  if(!stmtState.from){ stmtState.preset='mtd'; stmtState.from='2026-06-01'; stmtState.to=todayISO(); }
+  const invAll=INVOICES.filter(i=>i.customerId===c.id);
+  const payAll=PAYMENTS.filter(p=>p.customerId===c.id);
+  // filter by range
+  const inRange=d=>d>=stmtState.from&&d<=stmtState.to;
+  let lines=[];
+  if(stmtState.type==='open_balance'){
+    // open balance: unpaid/partial invoices (any date) + payments with unapplied amount
+    invAll.filter(i=>i.status!=='Paid').forEach(i=>
+      lines.push({date:i.createdDate||i.dueDate,ref:i.invoiceNumber,desc:'Invoice — '+statusBadge(i.status),debit:i.grandTotal,credit:i.amountPaid||0,balance:i.amountDue,status:i.status}));
+    payAll.filter(p=>p.unappliedAmount>0).forEach(p=>
+      lines.push({date:p.date,ref:p.reference||'—',desc:'Unallocated Payment ('+p.method+')',debit:0,credit:p.unappliedAmount,balance:0,status:'Open'}));
+    lines.sort((a,b)=>a.date.localeCompare(b.date));
+  } else {
+    // all transactions: every invoice + every payment within date range
+    invAll.filter(i=>inRange(i.createdDate||i.dueDate)).forEach(i=>
+      lines.push({date:i.createdDate||i.dueDate,ref:i.invoiceNumber,desc:'Invoice',debit:i.grandTotal,credit:i.amountPaid||0,balance:i.amountDue,status:i.status}));
+    payAll.filter(p=>inRange(p.date)).forEach(p=>
+      lines.push({date:p.date,ref:p.reference||'—',desc:'Payment ('+p.method+')'+(p.unappliedAmount>0?' · '+money(p.unappliedAmount)+' unallocated':''),debit:0,credit:p.amount,balance:p.unappliedAmount,status:p.unappliedAmount>0?'Open':'Paid'}));
+    lines.sort((a,b)=>a.date.localeCompare(b.date));
+  }
+  const totalDebit=lines.reduce((s,l)=>s+l.debit,0);
+  const totalCredit=lines.reduce((s,l)=>s+l.credit,0);
+  const netDue=totalDebit-totalCredit;
+  const presets=[['30d','Last 30d'],['60d','Last 60d'],['90d','Last 90d'],['mtd','This Month'],['lm','Last Month'],['ytd','YTD'],['ly','Last Year']];
+  return `
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-weight:600;margin-bottom:8px">Statement Options</div>
+    <div class="chips" style="margin-bottom:10px;gap:6px">
+      ${presets.map(([k,l])=>`<button class="chip ${stmtState.preset===k?'active':''}" style="font-size:.75rem;padding:5px 10px" onclick="stmtSetPreset('${k}')">${l}</button>`).join('')}
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1">
+        <div class="muted" style="font-size:.75rem;margin-bottom:4px">From</div>
+        <input class="inp" type="date" value="${stmtState.from}" onchange="stmtState.from=this.value;stmtState.preset='custom';render()" style="padding:6px 8px;font-size:.85rem"/>
+      </div>
+      <div style="flex:1">
+        <div class="muted" style="font-size:.75rem;margin-bottom:4px">To</div>
+        <input class="inp" type="date" value="${stmtState.to}" onchange="stmtState.to=this.value;stmtState.preset='custom';render()" style="padding:6px 8px;font-size:.85rem"/>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn ${stmtState.type==='open_balance'?'btn-primary':'btn-secondary'}" style="flex:1;padding:8px" onclick="stmtState.type='open_balance';render()">Open Balance</button>
+      <button class="btn ${stmtState.type==='all_transactions'?'btn-primary':'btn-secondary'}" style="flex:1;padding:8px" onclick="stmtState.type='all_transactions';render()">All Transactions</button>
+    </div>
+  </div>
+  ${lines.length?`
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-weight:600">${esc(c.name)}</div>
+      <div class="muted" style="font-size:.75rem">${stmtState.type==='open_balance'?'Open Balance':'Transactions '+fmtDate(stmtState.from)+' – '+fmtDate(stmtState.to)}</div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:.78rem">
+        <thead><tr style="border-bottom:2px solid var(--border)">
+          <th style="text-align:left;padding:4px 4px 6px;color:var(--text-secondary);font-weight:500">Date</th>
+          <th style="text-align:left;padding:4px 4px 6px;color:var(--text-secondary);font-weight:500">Ref</th>
+          <th style="text-align:right;padding:4px 4px 6px;color:var(--text-secondary);font-weight:500">Charges</th>
+          <th style="text-align:right;padding:4px 4px 6px;color:var(--text-secondary);font-weight:500">Payments</th>
+          <th style="text-align:right;padding:4px 4px 6px;color:var(--text-secondary);font-weight:500">Status</th>
+        </tr></thead>
+        <tbody>
+          ${lines.map(l=>`<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:5px 4px">${fmtDate(l.date)}</td>
+            <td style="padding:5px 4px;font-family:monospace">${esc(l.ref)}<div class="muted" style="font-size:.7rem">${esc(l.desc)}</div></td>
+            <td style="padding:5px 4px;text-align:right">${l.debit?money(l.debit):'—'}</td>
+            <td style="padding:5px 4px;text-align:right;color:var(--success)">${l.credit?money(l.credit):'—'}</td>
+            <td style="padding:5px 4px;text-align:right">${statusBadge(l.status)}</td>
+          </tr>`).join('')}
+          <tr style="border-top:2px solid var(--border);font-weight:700">
+            <td colspan="2" style="padding:6px 4px">Total Due</td>
+            <td style="padding:6px 4px;text-align:right">${money(totalDebit)}</td>
+            <td style="padding:6px 4px;text-align:right;color:var(--success)">${money(totalCredit)}</td>
+            <td style="padding:6px 4px;text-align:right;color:${netDue>0?'var(--danger)':'var(--success)'}">${money(netDue)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-secondary" style="flex:1" onclick="toast('Printing statement…')"><i data-lucide="printer"></i> Print</button>
+    <button class="btn btn-primary" style="flex:1" onclick="openSendMessage('${c.id}',true)"><i data-lucide="send"></i> Send</button>
+  </div>`:empty('scroll','No transactions','Adjust the date range or type.')}`;
 }
 function reduceCredit(e,id){ e.preventDefault(); const c=CUST(id); const v=parseFloat($('#redLimit').value);
   if(isNaN(v)||v>=c.creditLimit){ toast('New limit must be lower','error'); return; } c.creditLimit=v; toast('Credit limit reduced'); render(); }
@@ -849,7 +1062,8 @@ function orderReceipt(o,opts){
     <div class="row-link" style="cursor:pointer" onclick="location.hash='#customers/${c.id}'">
       <div style="font-weight:600">${esc(c.name)}</div>
       <div class="muted" style="font-size:.78rem">${c.code} · ${esc(c.type)}${c.isBranch?' · Branch (bill to '+esc(bill.name)+')':''}</div>
-      <div class="muted" style="font-size:.78rem">Placed ${fmtDate(o.createdDate)} · Delivery ${fmtDate(o.deliveryDate)} · ${esc(sp?sp.name:'')}</div></div>
+      <div class="muted" style="font-size:.78rem">Placed ${fmtDate(o.createdDate)} · Delivery ${fmtDate(o.deliveryDate)} · ${esc(sp?sp.name:'')}</div>
+      ${o.deliveryAddress&&o.deliveryAddress!==c.address?`<div style="font-size:.78rem;margin-top:3px;color:var(--primary)"><i data-lucide="map-pin" style="width:11px;height:11px"></i> ${esc(o.deliveryAddress)} <span class="badge sm" style="background:#e8f0fe;color:var(--primary);margin-left:3px">One-time</span></div>`:`<div class="muted" style="font-size:.78rem"><i data-lucide="map-pin" style="width:11px;height:11px"></i> ${esc(o.deliveryAddress||c.address)}</div>`}</div>
     <table style="width:100%;margin-top:10px;border-collapse:collapse">
       <thead><tr style="color:var(--text-muted);font-size:.7rem;text-align:left"><th style="padding:4px">Code</th><th style="padding:4px">Product</th><th style="padding:4px;text-align:center">Qty</th><th style="padding:4px;text-align:right">Unit Price</th><th style="padding:4px;text-align:right">Total</th>${editable?'<th></th>':''}</tr></thead>
       <tbody>${lineRows}</tbody></table>
@@ -877,14 +1091,15 @@ function openOrderMenu(id){ const o=ORD(id); const isDS=['Draft','Submitted'].in
     ${o.status==='Delivered'?item('↩️ Create Return',`startReturnFromOrder('${id}')`):''}
     ${isDS?item('🚫 Cancel Order',`cancelOrder('${id}')`,true):''}`);
 }
-function duplicateOrder(id){ const o=ORD(id); const n=makeOrder({id:uid('o'),orderNumber:nextOrderNumber(),customerId:o.customerId,salespersonId:CURRENT_USER_ID,status:'Draft',lineItems:o.lineItems.map(l=>Object.assign({},l,{lineId:uid('ln')})),deliveryDate:nextWorkingDay(),notes:'',createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString()});
-  ORDERS.unshift(n); toast('Order duplicated'); location.hash='#orders/'+n.id; }
+function duplicateOrder(id){ const o=ORD(id); const c=CUST(o.customerId);
+  state.wizard={step:2,customerId:o.customerId,lines:o.lineItems.map(l=>({lineId:uid('ln'),productId:l.productId,quantity:l.quantity,casePrice:l.casePrice,discount:l.discount})),orderDiscount:o.orderDiscount||0,deliverNow:false,deliveryDate:nextWorkingDay(),deliveryAddress:o.deliveryAddress||c.address,notes:o.notes||'',search:'',category:null,mode:'Catalog',createdId:null};
+  closeOverlay(); toast('Order loaded into builder — review and submit'); location.hash='#orders/new'; }
 function cancelOrder(id){ confirmDialog('Cancel Order','This order will be cancelled. Continue?',()=>{ const o=ORD(id); o.status='Cancelled'; toast('Order cancelled','warning'); render(); },'Cancel Order',true); }
 function printStandin(label){ openDialog(`<h3 style="margin:0 0 8px">Print Preview</h3><div class="card" style="background:#f8f9fa;text-align:center;padding:24px"><i data-lucide="printer" style="width:32px;height:32px"></i><div style="margin-top:8px;font-size:.9rem">${esc(label)}</div><div class="muted" style="font-size:.75rem;margin-top:4px">Sent to default printer (mock)</div></div><button class="btn btn-primary btn-full" style="margin-top:12px" onclick="closeOverlay()">Done</button>`); }
 function nextOrderNumber(){ return 'ORD-'+todayISO().replace(/-/g,'')+'-'+String(ORDERS.length+1).padStart(3,'0'); }
 function nextWorkingDay(){ let d=new Date(todayISO()); do{ d.setDate(d.getDate()+1);}while(!DELIVERY_DAYS.includes(d.getDay())); return d.toISOString().slice(0,10); }
 /* ===================== ORDER WIZARD ===================== */
-function startNewOrder(custId){ state.wizard={step:custId?2:1,customerId:custId||null,lines:[],orderDiscount:0,deliverNow:false,deliveryDate:nextWorkingDay(),notes:'',search:'',category:null,mode:'Catalog',createdId:null}; location.hash='#orders/new'; }
+function startNewOrder(custId){ const c=custId?CUST(custId):null; state.wizard={step:custId?2:1,customerId:custId||null,lines:[],orderDiscount:0,deliverNow:false,deliveryDate:nextWorkingDay(),deliveryAddress:c?c.address:'',notes:'',search:'',category:null,mode:'Catalog',createdId:null}; location.hash='#orders/new'; }
 route('orders/new',{ hideFab:true,
   title:()=>{ const w=state.wizard; const labels=['Select Customer','Build Order','Review Order','Confirmation']; return labels[(w?w.step:1)-1]; },
   render:()=>{ if(!state.wizard) startNewOrder(null); return wizardRender(); }
@@ -894,16 +1109,20 @@ function wizStepInd(){ const w=state.wizard; const labels=['Select Customer','Bu
     return `<div style="flex:1;text-align:center"><div style="height:4px;border-radius:999px;background:${done||active?'var(--primary)':'#e0e0e0'}"></div>
     <div style="font-size:.62rem;margin-top:4px;color:${active?'var(--primary)':'var(--text-muted)'};font-weight:${active?600:400}">${l}</div></div>`;}).join('')}</div>`; }
 function wizardRender(){ const w=state.wizard;
-  if(w.step===1) return wizStepInd()+wizStep1();
+  if(w.step===1) return wizStepInd()+wizStep1({changingCust:w.changingCust});
   if(w.step===2) return wizStepInd()+wizStep2();
   if(w.step===3) return wizStepInd()+wizStep3();
   if(w.step===4) return wizStep4();
 }
-function wizStep1(){ const w=state.wizard;
+function wizStep1(ctx){ const w=state.wizard; const changingCust=ctx&&ctx.changingCust;
   let list=CUSTOMERS.filter(c=>{ const q=w.search.toLowerCase(); if(!q)return true;
     return c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||c.address.toLowerCase().includes(q); })
     .sort((a,b)=>a.name.localeCompare(b.name));
-  return `<input class="inp" placeholder="Search customers or addresses..." value="${esc(w.search)}" oninput="state.wizard.search=this.value;render()"/>
+  return `${changingCust?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding:8px 10px;background:#e8f0fe;border-radius:8px;font-size:.85rem">
+    <i data-lucide="info" style="width:14px;height:14px;color:var(--primary)"></i>
+    <span style="flex:1">Cart items will be kept. Select a new customer.</span>
+    <button class="iconbtn" onclick="state.wizard.step=2;state.wizard.changingCust=false;render()"><i data-lucide="x"></i></button></div>`:''}  
+  <input class="inp" placeholder="Search customers or addresses..." value="${esc(w.search)}" oninput="state.wizard.search=this.value;render()"/>
   <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
     ${list.length?list.map(c=>{ const hold=c.status==='Hold'; const parent=c.isBranch?CUST(c.parentId):null;
       return `<div class="card" style="display:flex;align-items:center;gap:8px;${hold?'opacity:.5':'cursor:pointer'}" ${hold?'':`onclick="state.wizard.customerId='${c.id}';state.wizard.step=2;render()"`}>
@@ -911,7 +1130,8 @@ function wizStep1(){ const w=state.wizard;
         ${c.isBranch?`<div class="muted" style="font-size:.72rem">${esc(parent.name)}</div>`:''}
         <div class="muted" style="font-size:.75rem">${esc(c.address)}</div>${hold?'<div style="color:var(--danger);font-size:.72rem">On hold</div>':''}</div>
         <i data-lucide="chevron-right" class="muted"></i></div>`;}).join(''):`<div class="muted" style="text-align:center;padding:24px">No matches</div>`}
-  </div>`;
+  </div>
+  ${changingCust&&w.lines.length?`<button class="btn btn-secondary btn-full" style="margin-top:10px" onclick="state.wizard.step=2;state.wizard.changingCust=false;render()">← Keep current customer &amp; go back</button>`:''}`;
 }
 function wizCartTotals(){ const w=state.wizard;
   const cases=w.lines.reduce((s,l)=>s+l.quantity,0);
@@ -932,7 +1152,7 @@ function wizStep2(){ const w=state.wizard; const c=CUST(w.customerId); const t=w
   if(w.search){ const q=w.search.toLowerCase(); prods=prods.filter(p=>p.name.toLowerCase().includes(q)||p.code.includes(q)||(p.flavor||'').toLowerCase().includes(q)); }
   const modeBtn=(m,emoji,label)=>`<button class="btn ${w.mode===m?'btn-primary':'btn-secondary'}" style="flex:1" onclick="state.wizard.mode='${m}';render()">${emoji} ${label}</button>`;
   return `<div class="card" style="position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-    <div><div style="font-weight:600;font-size:.85rem">Customer: ${esc(c.name)}</div>${c.isBranch?`<div class="muted" style="font-size:.72rem"><i data-lucide="map-pin" style="width:11px;height:11px"></i> ${esc(c.address)}</div>`:''}</div>
+    <div><div style="font-weight:600;font-size:.85rem">Customer: ${esc(c.name)}</div>${c.isBranch?`<div class="muted" style="font-size:.72rem"><i data-lucide="map-pin" style="width:11px;height:11px"></i> ${esc(c.address)}</div>`:''}<button onclick="state.wizard.changingCust=true;state.wizard.step=1;state.wizard.search='';render()" style="background:none;border:none;font-size:.72rem;color:var(--primary);cursor:pointer;padding:2px 0;margin-top:2px">Change customer</button></div>
     <div style="text-align:right"><div class="muted" style="font-size:.7rem">Running total</div><div style="font-weight:700;font-size:.85rem">${t.cases} cs · ${money(t.grand)}</div></div></div>
   <div style="display:flex;gap:6px;margin-bottom:10px">${modeBtn('Catalog','📋','Catalog')}${modeBtn('Favorites','⭐','Favorites')}${modeBtn('Top','📈','Top')}</div>
   <input class="inp" placeholder="Search products..." value="${esc(w.search)}" oninput="state.wizard.search=this.value;render()"/>
@@ -957,14 +1177,33 @@ function discColor(disc,cap){ if(cap<=0)return ['#e0e0e0','#fff']; const pct=dis
   if(pct>100) return ['var(--danger)','#fee2e2']; if(pct>50) return ['#f59e0b','#ffedd5']; return ['var(--success)','#dcfce7']; }
 function openProductModal(productId, existingLineId){ const p=PROD(productId);
   const existing = existingLineId ? state.wizard.lines.find(l=>l.lineId===existingLineId) : null;
-  pmState={productId,lineId:existingLineId||null,quantity:existing?existing.quantity:1,casePrice:existing?existing.casePrice:p.casePrice,discount:existing?existing.discount:0};
+  // detect if this product is already in the order (without editing an existing line)
+  const alreadyIn = !existingLineId ? state.wizard.lines.filter(l=>l.productId===productId) : [];
+  pmState={productId,lineId:existingLineId||null,quantity:existing?existing.quantity:1,casePrice:existing?existing.casePrice:p.casePrice,discount:existing?existing.discount:0,discOpen:!!(existing&&existing.discount>0),alreadyIn,dupConfirmed:false};
   renderProductModal();
 }
 function renderProductModal(){ const p=PROD(pmState.productId); const cap=itemDiscountCap(pmState.casePrice);
   const dc=discColor(pmState.discount,cap); const units=pmState.quantity*p.unitsPerCase;
   const lineTotal=(pmState.casePrice-pmState.discount)*pmState.quantity;
   const fav=state.favorites.has(p.id);
+  const dupTotal = pmState.alreadyIn&&pmState.alreadyIn.length ? pmState.alreadyIn.reduce((s,l)=>s+l.quantity,0) : 0;
+  const willMerge = dupTotal && pmState.alreadyIn.some(l=>l.casePrice===pmState.casePrice&&l.discount===pmState.discount);
+  const dupNotice = dupTotal
+    ? pmState.dupConfirmed
+      ? `<div style="display:flex;align-items:center;gap:6px;background:#e6f4ea;border:1px solid #34a853;border-radius:8px;padding:7px 10px;margin-bottom:10px;font-size:.8rem;color:#1e7e34">
+          <i data-lucide="check-circle" style="width:14px;height:14px;flex:0 0 14px"></i>
+          Confirmed — will ${willMerge?'merge into existing line':'add as a separate line (different price)'}.
+        </div>`
+      : `<div style="background:#fef7e0;border:1px solid #f59e0b;border-radius:8px;padding:7px 10px;margin-bottom:10px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:#92400e">
+            <i data-lucide="alert-circle" style="width:14px;height:14px;flex:0 0 14px"></i>
+            Already in order (${dupTotal} case${dupTotal!==1?'s':''}). Will ${willMerge?'merge quantities':'add as a separate line (different price)'}.
+          </div>
+          <button onclick="pmState.dupConfirmed=true;renderProductModal()" class="btn btn-full" style="margin-top:8px;padding:6px;font-size:.8rem;background:#f59e0b;color:#fff;border:none">Confirm &amp; continue</button>
+        </div>`
+    : '';
   openSheet(`<div style="display:flex;justify-content:flex-end"><button class="iconbtn" style="background:#f1f3f4" onclick="closeOverlay()"><i data-lucide="x"></i></button></div>
+    ${dupNotice}
     <div style="font-weight:700;font-size:1.05rem">${esc(p.name)}</div>
     <div class="muted" style="font-size:.8rem">${p.size} · ${p.packSize} · ${money(p.unitPrice)}/ea · Code: ${p.code}</div>
     <div style="margin-top:14px"><div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Quantity (cases)</div>
@@ -975,26 +1214,33 @@ function renderProductModal(){ const p=PROD(pmState.productId); const cap=itemDi
       <div class="muted" style="font-size:.75rem;text-align:center;margin-top:4px">Units: ${units} (${pmState.quantity} × ${p.unitsPerCase})</div></div>
     <div style="margin-top:12px"><div style="font-size:.8rem;font-weight:500;margin-bottom:4px">Case Price</div>
       <input class="inp mono" type="number" step="0.01" min="0.01" value="${pmState.casePrice.toFixed(2)}" onchange="pmState.casePrice=Math.max(0.01,parseFloat(this.value)||0.01);renderProductModal()"/></div>
-    <div style="margin-top:12px"><div style="display:flex;justify-content:space-between"><span style="font-size:.8rem;font-weight:500">Discount %</span><span class="muted" style="font-size:.75rem">max ${DISCOUNT_SETTINGS.perItemPercent} %</span></div>
+    <div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+      <button onclick="pmState.discOpen=!pmState.discOpen;renderProductModal()" style="background:none;border:1px solid ${pmState.discount>0?dc[0]:'var(--border)'};border-radius:6px;padding:4px 10px;font-size:.78rem;color:${pmState.discount>0?dc[0]:'var(--text-secondary)'};cursor:pointer">
+        ${pmState.discount>0?`% Disc · −${money(pmState.discount)}`:'% Disc'}
+        <i data-lucide="${pmState.discOpen?'chevron-up':'chevron-down'}" style="width:12px;height:12px;vertical-align:middle;margin-left:2px"></i>
+      </button>
+      ${pmState.discount>0?`<span style="font-size:.78rem;color:var(--success)">Saves ${money(pmState.discount*pmState.quantity)}</span>`:''}
+    </div>
+    ${pmState.discOpen?`<div style="background:#f8f9fa;border-radius:8px;padding:10px;margin-top:6px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:.8rem;font-weight:500">Discount per case</span><span class="muted" style="font-size:.75rem">max ${DISCOUNT_SETTINGS.perItemPercent}% = ${money(cap)}</span></div>
       <input type="range" min="0" max="${cap.toFixed(2)}" step="0.5" value="${pmState.discount}" style="width:100%;accent-color:${dc[0]}" oninput="pmState.discount=parseFloat(this.value);renderProductModal()"/>
-      <div style="display:flex;justify-content:space-between;align-items:center"><input class="inp mono" style="width:90px;border-color:${dc[0]};background:${dc[1]}" type="number" step="0.5" min="0" max="${cap.toFixed(2)}" value="${pmState.discount}" onchange="pmState.discount=Math.min(${cap.toFixed(2)},Math.max(0,parseFloat(this.value)||0));renderProductModal()"/>
-      <span style="font-size:.78rem;color:var(--success)">Saves ${money(pmState.discount*pmState.quantity)}</span></div></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+        <input class="inp mono" style="flex:1;border-color:${dc[0]};background:${dc[1]}" type="number" step="0.5" min="0" max="${cap.toFixed(2)}" value="${pmState.discount}" onchange="pmState.discount=Math.min(${cap.toFixed(2)},Math.max(0,parseFloat(this.value)||0));renderProductModal()"/>
+        <button onclick="pmState.discount=0;pmState.discOpen=false;renderProductModal()" style="background:none;border:none;font-size:.78rem;color:var(--danger);cursor:pointer">Clear</button>
+      </div>
+    </div>`:''}
+
     <div class="card" style="background:#f8f9fa;margin-top:12px">${totRow('Deposit / case',p.depositPerCase)}<div style="display:flex;justify-content:space-between;font-weight:700;margin-top:4px"><span>Line total</span><span class="mono">${money(lineTotal)}</span></div></div>
     <button class="btn btn-secondary btn-full" style="margin-top:10px;${fav?'color:#d4a017;border-color:#d4a017':''}" onclick="toggleFav('${p.id}')">${fav?'⭐ Remove from Favorites':'☆ Add to Favorites'}</button>
-    <button class="btn btn-primary btn-full btn-lg" style="margin-top:10px" onclick="addToOrder()">${pmState.lineId?'UPDATE ORDER':'ADD TO ORDER'}</button>`);
+    <button class="btn btn-primary btn-full btn-lg" style="margin-top:10px" ${dupTotal&&!pmState.dupConfirmed?'disabled':''} onclick="addToOrder()">${pmState.lineId?'UPDATE ORDER':dupTotal&&!pmState.dupConfirmed?'CONFIRM ABOVE TO ADD':'ADD TO ORDER'}</button>`);
 }
-function pmAdj(field,delta){ pmState[field]=Math.max(1,pmState[field]+delta); renderProductModal(); }
+function pmAdj(field,delta){ pmState[field]=Math.max(1,pmState[field]+delta); pmState.dupConfirmed=false; renderProductModal(); }
 function toggleFav(id){ if(state.favorites.has(id))state.favorites.delete(id); else state.favorites.add(id); renderProductModal(); }
 function addToOrder(){ const w=state.wizard; const p=PROD(pmState.productId);
   if(pmState.lineId){ const l=w.lines.find(x=>x.lineId===pmState.lineId); Object.assign(l,{quantity:pmState.quantity,casePrice:pmState.casePrice,discount:pmState.discount}); closeOverlay(); toast('Order line updated'); render(); return; }
-  // check for existing same product
+  // auto-decide: same price+discount → merge; different → separate line
   const same=w.lines.find(l=>l.productId===p.id&&l.casePrice===pmState.casePrice&&l.discount===pmState.discount);
-  const diff=w.lines.find(l=>l.productId===p.id&&(l.casePrice!==pmState.casePrice||l.discount!==pmState.discount));
   if(same){ same.quantity+=pmState.quantity; closeOverlay(); toast('Merged into existing line'); render(); return; }
-  if(diff){ closeOverlay(); confirmDialog('Same product, different price','This product is already in the order at a different price/discount. Merge or add a new line?',()=>{ diff.quantity+=pmState.quantity; toast('Merged'); render(); },'Merge');
-    // also add a New Line option via second button — keep simple: provide new line on overlay
-    $('#ov-content').insertAdjacentHTML('beforeend',`<button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="closeOverlay();pushNewLine('${p.id}',${pmState.quantity},${pmState.casePrice},${pmState.discount})">Add as new line</button>`);
-    return; }
   pushNewLine(p.id,pmState.quantity,pmState.casePrice,pmState.discount); closeOverlay(); toast('Added to order'); render();
 }
 function pushNewLine(pid,qty,price,disc){ state.wizard.lines.push({lineId:uid('ln'),productId:pid,quantity:qty,casePrice:price,discount:disc}); render(); }
@@ -1022,12 +1268,21 @@ function wizStep3(){ const w=state.wizard; const c=CUST(w.customerId); const bil
         <span class="mono" style="font-weight:600">${money(lt)}</span></div>
       <div class="muted" style="font-size:.72rem;padding-left:48px">↳ Deposit: ${l.quantity} × ${money(p.depositPerCase)} = ${money(p.depositPerCase*l.quantity)}</div>
     </div>`;}).join('');
+  // reset deliveryAddress if customer changed and address is blank
+  if(!w.deliveryAddress) w.deliveryAddress=c.address;
+  const isCustomAddr = w.deliveryAddress !== c.address;
   return `<div class="card">
     <div style="font-weight:700">${esc(c.name)}</div>
     <div class="muted" style="font-size:.78rem">${c.code} · ${esc(c.type)}</div>
-    <div class="muted" style="font-size:.78rem">${esc(c.address)}</div>
-    <div class="muted" style="font-size:.78rem">${esc(c.route)}</div>
     <div class="muted" style="font-size:.78rem">${c.paymentType==='credit'?`Credit (Available: ${money(avail)})`:'Prepaid'} · ${c.terms} · Price Level ${c.priceLevel}</div></div>
+  <div class="card" style="margin-top:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <div style="font-size:.8rem;font-weight:600;display:flex;align-items:center;gap:5px"><i data-lucide="map-pin" style="width:14px;height:14px"></i> Delivery Address</div>
+      <button onclick="openDeliveryAddressSheet()" style="background:none;border:none;font-size:.75rem;color:var(--primary);cursor:pointer">Change</button>
+    </div>
+    <div style="font-size:.85rem;${isCustomAddr?'color:var(--primary);font-weight:500':''}">${esc(w.deliveryAddress)}</div>
+    ${isCustomAddr?`<span class="badge" style="background:#e8f0fe;color:var(--primary);margin-top:4px;font-size:.7rem">One-time address</span>`:''}
+  </div>
   ${prepaid&&bill.balance>0?`<div class="card" style="margin-top:10px;background:#fee2e2;border:1px solid var(--danger);color:#991b1b;font-size:.82rem">⚠️ Prepaid customer has ${money(bill.balance)} outstanding — collect payment before submitting.</div>`:''}
   <div class="card" style="margin-top:10px"><div style="font-weight:600;font-size:.85rem;margin-bottom:4px">Items</div>${lineHtml}
     <div style="margin-top:10px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:.8rem;font-weight:500">Order Discount %</span><span class="muted" style="font-size:.72rem">max ${DISCOUNT_SETTINGS.perOrderPercent} %</span></div>
@@ -1056,10 +1311,45 @@ function deliveryPicker(){ const w=state.wizard; const base=new Date(todayISO())
 }
 function wizLineQty(lid,d){ const l=state.wizard.lines.find(x=>x.lineId===lid); l.quantity=Math.max(1,l.quantity+d); render(); }
 function wizRemove(lid){ state.wizard.lines=state.wizard.lines.filter(x=>x.lineId!==lid); if(!state.wizard.lines.length)state.wizard.step=2; render(); }
+function openDeliveryAddressSheet(){
+  const w=state.wizard; const c=CUST(w.customerId);
+  const saved=(c.savedAddresses||[]);
+  const addrRow=(addr,label,badge)=>`<div class="card row-link" style="margin-bottom:8px;cursor:pointer;border:2px solid ${w.deliveryAddress===addr?'var(--primary)':'transparent'}" onclick="w.deliveryAddress='${addr.replace(/'/g,'\\&apos;')}';closeOverlay();render()">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div><div style="font-size:.85rem;font-weight:500">${esc(label)}</div><div class="muted" style="font-size:.75rem">${esc(addr)}</div></div>
+      ${badge||''}${w.deliveryAddress===addr?'<i data-lucide="check" style="width:16px;height:16px;color:var(--primary)"></i>':''}
+    </div></div>`;
+  openSheet(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:1.125rem;font-weight:600">Delivery Address</h3>
+      <button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button>
+    </div>
+    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Customer Address</div>
+    ${addrRow(c.address,c.name,'')}
+    ${saved.length?`<div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin:12px 0 8px">Saved Addresses</div>
+    ${saved.map(sa=>addrRow(sa.address,sa.label,`<button onclick="event.stopPropagation();if(confirm('Remove this saved address?')){c.savedAddresses=c.savedAddresses.filter(x=>x.id!=='${sa.id}');if(w.deliveryAddress===sa.address)w.deliveryAddress=c.address;closeOverlay();render();}" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:.75rem;padding:2px 4px"><i data-lucide="trash-2" style="width:13px;height:13px"></i></button>`)).join('')}`:''}
+    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin:12px 0 8px">One-time Address</div>
+    <input class="inp" id="addrInput" placeholder="Enter delivery address..." value="${esc(w.deliveryAddress!==c.address&&!saved.find(s=>s.address===w.deliveryAddress)?w.deliveryAddress:'')}"/>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;cursor:pointer">
+        <input type="checkbox" id="addrSave"/> Save to address list
+      </label>
+      <input class="inp" id="addrLabel" placeholder="Label (e.g. Event at Javits)" style="flex:1;font-size:.8rem;padding:5px 8px"/>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:10px" onclick="applyOneTimeAddress()">Use This Address</button>`);
+}
+function applyOneTimeAddress(){
+  const w=state.wizard; const c=CUST(w.customerId);
+  const addr=$('#addrInput').value.trim();
+  if(!addr){toast('Enter an address','error');return;}
+  const save=$('#addrSave').checked; const label=$('#addrLabel').value.trim()||addr;
+  if(save){ if(!(c.savedAddresses||[]).find(s=>s.address===addr)){ if(!c.savedAddresses)c.savedAddresses=[]; c.savedAddresses.push({id:uid('sa'),label,address:addr}); toast('Address saved'); }}
+  w.deliveryAddress=addr; closeOverlay(); render();
+}
 function submitWizardOrder(paid){ const w=state.wizard; const c=CUST(w.customerId);
   const lineItems=w.lines.map(l=>{ const p=PROD(l.productId); return mkLineFrom(l,p); });
   const o=makeOrder({id:uid('o'),orderNumber:nextOrderNumber(),customerId:w.customerId,salespersonId:CURRENT_USER_ID,status:'Submitted',
-    orderDiscount:w.orderDiscount,lineItems,deliveryDate:w.deliverNow?todayISO():w.deliveryDate,notes:w.notes,createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString()});
+    orderDiscount:w.orderDiscount,lineItems,deliveryDate:w.deliverNow?todayISO():w.deliveryDate,deliveryAddress:w.deliveryAddress||c.address,notes:w.notes,createdDate:new Date().toISOString(),modifiedDate:new Date().toISOString()});
   ORDERS.unshift(o); w.createdId=o.id; w.step=4;
   RECENT_ACTIVITY.unshift({id:uid('a'),type:'order',text:`Order #${o.orderNumber} placed — ${c.name}`,date:new Date().toISOString(),linkTo:'#orders/'+o.id});
   toast('Order submitted'); render();
@@ -1128,7 +1418,7 @@ function processPayment(){ const s=payModalState; const c=CUST(s.customerId);
 function finishPayment(){ const s=payModalState; closeOverlay(); toast('Payment posted'); if(s.onSuccess)s.onSuccess(); else render(); }
 /* ===================== PAYMENT SCREEN ===================== */
 const payScreen={customerId:null,q:'',tab:'Invoices',selected:new Set()};
-function startPayment(custId){ payScreen.customerId=custId; payScreen.selected=new Set(); location.hash='#payments'; }
+function startPayment(custId){ payScreen.customerId=custId; payScreen.selected=new Set(); payScreen.tab='Invoices'; if(location.hash==='#payments') render(); else location.hash='#payments'; }
 route('payments',{ root:true, title:'Collect Payment', hideFab:true,
   render:()=> payScreen.customerId ? paymentSelected() : paymentPickCustomer()
 });
@@ -1157,11 +1447,11 @@ function paymentSelected(){ const c=CUST(payScreen.customerId);
     <div style="display:flex;gap:6px;margin-top:12px">
       <button class="btn ${payScreen.tab==='Orders'?'btn-primary':'btn-secondary'} btn-full" onclick="payScreen.tab='Orders';payScreen.selected=new Set();render()">Orders (${orders.length})</button>
       <button class="btn ${payScreen.tab==='Invoices'?'btn-primary':'btn-secondary'} btn-full" onclick="payScreen.tab='Invoices';payScreen.selected=new Set();render()">Invoices (${invoices.length})</button></div>
-    <div style="margin-top:12px"><button class="btn btn-secondary" style="padding:4px 10px;font-size:.75rem;margin-bottom:8px" onclick="selectAllPay()">Select All</button>
-      ${items.length?items.map(it=>row(it,payScreen.tab==='Invoices')).join(''):empty('check-circle','Nothing outstanding','')}</div>
+    <div style="margin-top:12px">${items.length?`<button class="btn btn-secondary" style="padding:4px 10px;font-size:.75rem;margin-bottom:8px" onclick="selectAllPay()">Select All</button>`:''}
+      ${items.length?items.map(it=>row(it,payScreen.tab==='Invoices')).join(''):`<div class="card" style="text-align:center;padding:20px"><div style="font-size:1.4rem;margin-bottom:6px;color:#16a34a">✓</div><div style="font-weight:600;font-size:.9rem">No outstanding ${payScreen.tab.toLowerCase()}</div><div class="muted" style="font-size:.8rem;margin-top:4px">Collect a payment to apply as account credit</div></div>`}</div>
     <div style="position:absolute;left:0;right:0;bottom:56px;background:#fff;border-top:1px solid var(--border);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
       <span style="font-weight:600">Selected total: ${money(selTotal)}</span>
-      <button class="btn btn-primary" ${selTotal>0?'':'disabled'} onclick="openPayForSelection()">Collect</button></div>`;
+      <button class="btn btn-primary" onclick="openPayForSelection()">${selTotal>0?'Collect '+money(selTotal):'Collect Custom Amt'}</button></div>`;
 }
 function togglePaySel(id){ if(payScreen.selected.has(id))payScreen.selected.delete(id); else payScreen.selected.add(id); render(); }
 function selectAllPay(){ const c=CUST(payScreen.customerId);
@@ -1169,8 +1459,18 @@ function selectAllPay(){ const c=CUST(payScreen.customerId);
   items.forEach(i=>payScreen.selected.add(i.id)); render(); }
 function openPayForSelection(){ const c=CUST(payScreen.customerId);
   const selTotal=[...payScreen.selected].reduce((s,id)=>{ const inv=INV(id); if(inv)return s+inv.amountDue; const o=ORD(id); return s+(o?o.grandTotal:0); },0);
+  if(selTotal===0){ justCollectCredit(c.id); return; }
   const applyTo=[...payScreen.selected].filter(id=>INV(id)).map(id=>({invoiceId:id,amount:INV(id).amountDue}));
-  paymentModal({customerId:c.id,amount:selTotal,context:`${payScreen.selected.size} ${payScreen.tab.toLowerCase()}`,apply:true,onSuccess:()=>{ applyTo.forEach(a=>{const inv=INV(a.invoiceId); inv.amountPaid+=a.amount; inv.amountDue=Math.max(0,inv.grandTotal-inv.amountPaid); recomputeInvoiceStatus(inv);}); payScreen.selected=new Set(); render(); }});
+  paymentModal({customerId:c.id,amount:selTotal,context:`${payScreen.selected.size} ${payScreen.tab.toLowerCase()} (partial payment allowed)`,apply:true,
+    onSuccess:()=>{
+      const paid=payModalState.amount;
+      const ratio=selTotal>0?Math.min(paid/selTotal,1):0;
+      applyTo.forEach(a=>{ const inv=INV(a.invoiceId); if(!inv)return;
+        const applyAmt=+(a.amount*ratio).toFixed(2);
+        inv.amountPaid=+(inv.amountPaid+applyAmt).toFixed(2);
+        inv.amountDue=Math.max(0,+(inv.grandTotal-inv.amountPaid).toFixed(2));
+        recomputeInvoiceStatus(inv); });
+      payScreen.selected=new Set(); render(); }});
   payModalState.applyTo=applyTo;
 }
 function useCreditOn(id){ const c=CUST(payScreen.customerId); const inv=INV(id); const amt=Math.min(c.accountCredit, inv?inv.amountDue:ORD(id).grandTotal);
@@ -1294,27 +1594,266 @@ function openReturnMenu(id){ openSheet(`<div style="display:flex;justify-content
 function processReturn(id){ const r=RET(id); r.status='Processed'; r.processedDate=new Date().toISOString(); r.creditApplied=r.grandTotal;
   const c=CUST(r.customerId); c.accountCredit+=r.grandTotal; toast('Return processed & credit applied'); render(); }
 /* ===================== REPORTS ===================== */
-route('reports',{ root:true, title:'Reports', headerRight:()=>bellBtn(),
-  render:()=>{
-    const openBalance=CUSTOMERS.reduce((s,c)=>s+c.balance,0);
-    const overdue=INVOICES.filter(i=>i.status==='Overdue').length;
-    const returnsYTD=RETURNS.length;
-    const kpi=(emoji,label,val,hash)=>`<div class="card row-link" ${hash?`onclick="location.hash='${hash}'"`:''} style="cursor:pointer"><div style="font-size:1.3rem">${emoji}</div><div style="font-size:1.4rem;font-weight:700">${val}</div><div class="muted" style="font-size:.78rem">${label}</div></div>`;
-    const tool=(emoji,label,hash,badge)=>`<button class="card row-link" onclick="location.hash='${hash}'" style="text-align:left;border:none;cursor:pointer;position:relative"><div style="font-size:1.3rem">${emoji}</div><div style="font-weight:500;margin-top:4px">${label}</div>${badge?`<span style="position:absolute;top:10px;right:10px;background:var(--danger);color:#fff;border-radius:999px;font-size:.65rem;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px">${badge}</span>`:''}</button>`;
-    return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${kpi('💰','Open Balance',money(openBalance))}${kpi('⏰','Overdue Invoices',overdue)}
-        ${kpi('↩','Returns YTD',returnsYTD)}${kpi('👥','Customers',CUSTOMERS.length,'#customers')}</div>
-      <h3 style="font-size:1.1rem;font-weight:500;margin:18px 0 8px">Tools</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${tool('🔔','Notifications','#notifications',unreadCount())}
-        ${tool('✅','Tasks','#tasks',openTasks().length)}
-        ${tool('🔗','Payment Links','#payment_links',pendingLinks().length)}
-        ${tool('⚙️','Settings','#settings')}</div>
-      ${returnsReportWidget()}
-      <h3 style="font-size:1.1rem;font-weight:500;margin:18px 0 8px">Recent Returns</h3>
-      ${RETURNS.slice(0,5).map(returnRow).join('')||empty('rotate-ccw','No returns','')}`;
+const RPT_BUCKETS=[{key:'current',label:'Current',bg:'#dcfce7',text:'#166534'},{key:'1-30',label:'1–30',bg:'#fef9c3',text:'#854d0e'},{key:'31-60',label:'31–60',bg:'#ffedd5',text:'#9a3412'},{key:'61-90',label:'61–90',bg:'#fee2e2',text:'#991b1b'},{key:'90+',label:'90+',bg:'#f3e8ff',text:'#6b21a8'}];
+const rptState={q:'',chip:'All',sort:'balance',dir:'desc',types:new Set(),selectedIds:new Set(),activeBuckets:new Set(['current','1-30','31-60','61-90','90+']),breakdown:'balance',built:false,reportData:[]};
+const RPT_BREAKDOWNS=[{key:'balance',label:'Balance Only',sub:'Net amount due'},{key:'open',label:'Open Transactions',sub:'Unpaid invoices'},{key:'all',label:'All Transactions',sub:'Every invoice'}];
+function rptSortCustomers(arr){
+  const d=rptState.dir==='asc'?1:-1;
+  const a2=[...arr];
+  switch(rptState.sort){
+    case 'az':        a2.sort((a,b)=>d*a.customer.name.localeCompare(b.customer.name)); break;
+    case 'lastorder': a2.sort((a,b)=>d*((a.customer.lastOrderDate||'').localeCompare(b.customer.lastOrderDate||''))); break;
+    case 'frequency': a2.sort((a,b)=>d*((a.customer.avgOrderCases||0)-(b.customer.avgOrderCases||0))); break;
+    default:          a2.sort((a,b)=>d*(a.netBalance-b.netBalance));
   }
+  return a2;
+}
+
+function rptBucketKey(dueDate){ const d=daysBetween(dueDate,todayISO()); if(d<=0)return'current'; if(d<=30)return'1-30'; if(d<=60)return'31-60'; if(d<=90)return'61-90'; return'90+'; }
+function rptCustMatchesChip(c){
+  switch(rptState.chip){
+    case 'Active': return c.status==='Active';
+    case 'Hold': return c.status==='Hold';
+    case 'Overdue': return INVOICES.some(i=>i.customerId===c.id && i.status==='Overdue');
+    case 'Prepaid': return c.paymentType==='prepaid';
+    case 'Credit': return c.paymentType==='credit';
+    default: return true;
+  }
+}
+function rptFilteredCustomers(){
+  const q=rptState.q.toLowerCase();
+  const d=rptState.dir==='asc'?1:-1;
+  let list=CUSTOMERS.filter(rptCustMatchesChip)
+    .filter(c=>!rptState.types.size||rptState.types.has(c.type))
+    .filter(c=>!q||c.name.toLowerCase().includes(q)||c.code.toLowerCase().includes(q)||(c.address||'').toLowerCase().includes(q));
+  switch(rptState.sort){
+    case 'balance':   list.sort((a,b)=>d*(a.balance-b.balance)); break;
+    case 'lastorder': list.sort((a,b)=>d*((a.lastOrderDate||'').localeCompare(b.lastOrderDate||''))); break;
+    case 'frequency': list.sort((a,b)=>d*((a.avgOrderCases||0)-(b.avgOrderCases||0))); break;
+    default:          list.sort((a,b)=>d*a.name.localeCompare(b.name));
+  }
+  return list;
+}
+function rptActiveFilterCount(){ return rptState.types.size; }
+function rptToggleCust(id){ rptState.selectedIds.has(id)?rptState.selectedIds.delete(id):rptState.selectedIds.add(id); render(); }
+function rptSelectAll(){ const list=rptFilteredCustomers(); const allSel=list.length>0&&list.every(c=>rptState.selectedIds.has(c.id)); list.forEach(c=>allSel?rptState.selectedIds.delete(c.id):rptState.selectedIds.add(c.id)); render(); }
+function rptToggleBucket(k){ rptState.activeBuckets.has(k)?rptState.activeBuckets.delete(k):rptState.activeBuckets.add(k); render(); }
+function rptClearSelection(){ rptState.selectedIds.clear(); render(); }
+function openRptFilterSheet(){
+  const fc=rptActiveFilterCount();
+  const types=[...new Set(CUSTOMERS.map(c=>c.type).filter(Boolean))].sort();
+  openSheet(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="margin:0;font-size:1.125rem;font-weight:600">Filters</h3>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${fc?`<button class="btn btn-secondary" style="padding:4px 10px;font-size:.8rem" onclick="rptState.types.clear();closeOverlay();render()">Clear all</button>`:''}
+        <button class="iconbtn" onclick="closeOverlay()"><i data-lucide="x"></i></button>
+      </div>
+    </div>
+    <div style="font-size:.75rem;font-weight:600;color:var(--text-secondary);letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px">Type</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px">
+      ${types.map(t=>`<button class="chip ${rptState.types.has(t)?'active':''}" onclick="rptState.types.has('${esc(t)}')?rptState.types.delete('${esc(t)}'):rptState.types.add('${esc(t)}');this.classList.toggle('active')">${esc(t)}</button>`).join('')}
+    </div>
+    <button class="btn btn-primary btn-full btn-lg" onclick="closeOverlay();render()">Apply Filters${rptActiveFilterCount()?` (${rptActiveFilterCount()})`:''}</button>`);
+}
+function rptBuild(){
+  const selected=CUSTOMERS.filter(c=>rptState.selectedIds.has(c.id));
+  rptState.reportData=selected.map(customer=>{
+    const allInv=INVOICES.filter(i=>i.customerId===customer.id).map(inv=>({...inv,daysOverdue:Math.max(0,daysBetween(inv.dueDate,todayISO())),bucketKey:rptBucketKey(inv.dueDate)}));
+    const openInv=allInv.filter(i=>i.status!=='Paid');
+    const buckets={current:{invoices:[],total:0},'1-30':{invoices:[],total:0},'31-60':{invoices:[],total:0},'61-90':{invoices:[],total:0},'90+':{invoices:[],total:0}};
+    openInv.forEach(inv=>{ buckets[inv.bucketKey].invoices.push({...inv,balance:inv.amountDue}); buckets[inv.bucketKey].total+=inv.amountDue; });
+    const totalBalance=Object.values(buckets).reduce((s,b)=>s+b.total,0);
+    const credit=customer.accountCredit||0;
+    return {customer,buckets,allInvoices:allInv.sort((a,b)=>b.createdDate.localeCompare(a.createdDate)),openInvoices:openInv.sort((a,b)=>a.dueDate.localeCompare(b.dueDate)),totalBalance,accountCredit:credit,netBalance:totalBalance-credit};
+  }).filter(r=>r.totalBalance>0||rptState.breakdown==='all');
+  rptState.built=true; render();
+}
+function rptExport(){
+  const {reportData,activeBuckets,breakdown}=rptState;
+  if(!reportData.length){toast('No data to export','warning');return;}
+  let csv='';
+  if(breakdown==='balance'){
+    csv='Customer,Contact,Phone,Email,Address,Current,1-30,31-60,61-90,90+,Gross Balance,Account Credit,Net Balance\n';
+    rptSortCustomers(reportData).forEach(({customer,buckets,totalBalance,accountCredit,netBalance})=>{
+      const t=k=>(activeBuckets.has(k)?buckets[k].total.toFixed(2):'0.00');
+      csv+=`"${customer.name}","${customer.contact||''}","${customer.phone||''}","${customer.email||''}","${customer.address||''}",${t('current')},${t('1-30')},${t('31-60')},${t('61-90')},${t('90+')},${totalBalance.toFixed(2)},${accountCredit.toFixed(2)},${netBalance.toFixed(2)}\n`;
+    });
+  } else {
+    csv='Customer,Contact,Phone,Email,Address,Invoice #,Status,Created,Due Date,Days Overdue,Bucket,Invoice Total,Amt Paid,Balance\n';
+    rptSortCustomers(reportData).forEach(({customer})=>{
+      const txns=breakdown==='all'?reportData.find(r=>r.customer.id===customer.id).allInvoices:reportData.find(r=>r.customer.id===customer.id).openInvoices;
+      txns.filter(inv=>activeBuckets.has(inv.bucketKey)||inv.status==='Paid').forEach(inv=>{
+        const bktLabel=(RPT_BUCKETS.find(b=>b.key===inv.bucketKey)||{label:''}).label;
+        csv+=`"${customer.name}","${customer.contact||''}","${customer.phone||''}","${customer.email||''}","${customer.address||''}","${inv.invoiceNumber}","${inv.status}","${inv.createdDate.slice(0,10)}","${inv.dueDate}",${inv.daysOverdue},"${bktLabel}",${inv.grandTotal.toFixed(2)},${inv.amountPaid.toFixed(2)},${inv.amountDue.toFixed(2)}\n`;
+      });
+    });
+  }
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
+  a.download='balance-report-'+todayISO()+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  toast('CSV downloaded');
+}
+route('reports',{ root:true, title:'Balance Report', hideFab:true, headerRight:()=>hamBtn(),
+  render:()=> rptState.built ? rptRenderReport() : rptRenderPanel()
 });
+function rptRenderPanel(){
+  const filtered=rptFilteredCustomers();
+  const chips=['All','Active','Hold','Overdue','Prepaid','Credit'];
+  const allChecked=filtered.length>0&&filtered.every(c=>rptState.selectedIds.has(c.id));
+  const fc=rptActiveFilterCount();
+  const dirIcon=rptState.dir==='asc'?'arrow-up':'arrow-down';
+  return `<div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-weight:600;font-size:.92rem">Select Customers</span>
+      ${rptState.selectedIds.size>0?`<button onclick="rptClearSelection()" style="font-size:.78rem;background:var(--primary-light);color:var(--primary);padding:3px 10px;border-radius:999px;font-weight:600;border:none;cursor:pointer">${rptState.selectedIds.size} selected · clear</button>`:''}
+    </div>
+    <input class="inp" placeholder="Search name, code, address..." value="${esc(rptState.q)}" oninput="rptState.q=this.value;render()"/>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+      <select class="inp" style="flex:1;padding:6px 8px;font-size:.8rem" onchange="rptState.sort=this.value;render()">
+        <option value="balance"   ${rptState.sort==='balance'  ?'selected':''}>Open Balance</option>
+        <option value="az"        ${rptState.sort==='az'       ?'selected':''}>A → Z</option>
+        <option value="lastorder" ${rptState.sort==='lastorder'?'selected':''}>Last Order</option>
+        <option value="frequency" ${rptState.sort==='frequency'?'selected':''}>Frequency</option>
+      </select>
+      <button class="iconbtn" title="Toggle direction" style="border:1px solid var(--border);border-radius:8px;width:36px;height:36px;flex:0 0 36px" onclick="rptState.dir=rptState.dir==='asc'?'desc':'asc';render()">
+        <i data-lucide="${dirIcon}" style="width:16px;height:16px"></i>
+      </button>
+      <button class="btn btn-secondary" style="padding:6px 10px;font-size:.8rem;position:relative;white-space:nowrap;flex:0 0 auto" onclick="openRptFilterSheet()">
+        <i data-lucide="sliders-horizontal" style="width:15px;height:15px"></i> Filters
+        ${fc?`<span style="position:absolute;top:-4px;right:-4px;background:var(--primary);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${fc}</span>`:''}
+      </button>
+    </div>
+    <div class="chips" style="margin-top:10px">${chips.map(ch=>`<button class="chip ${rptState.chip===ch?'active':''}" onclick="rptState.chip='${ch}';render()">${ch}</button>`).join('')}</div>
+    ${fc?`<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+      ${[...rptState.types].map(t=>`<span class="chip active" style="font-size:.75rem;padding:4px 8px">${esc(t)} <span onclick="rptState.types.delete('${esc(t)}');render()" style="margin-left:4px;cursor:pointer;opacity:.8">×</span></span>`).join('')}
+    </div>`:''}
+    <label style="display:flex;align-items:center;gap:8px;padding:10px 0 8px;border-bottom:1px solid var(--border);margin-top:10px;cursor:pointer;font-size:.82rem;font-weight:600">
+      <input type="checkbox" ${allChecked?'checked':''} onchange="rptSelectAll()"/> Select all visible (${filtered.length})
+    </label>
+    <div style="max-height:280px;overflow-y:auto">
+      ${filtered.map(c=>`<label style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <input type="checkbox" ${rptState.selectedIds.has(c.id)?'checked':''} onchange="rptToggleCust('${c.id}')"/>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c.name)}</div>
+          <div class="muted" style="font-size:.7rem">${esc(c.code)} · ${esc(c.type)}${c.lastOrderDate?' · '+fmtDate(c.lastOrderDate):''}</div>
+        </div>
+        <span style="font-size:.82rem;font-weight:600;color:${c.balance>0?'var(--danger)':'var(--text-muted)'}">${money(c.balance)}</span>
+      </label>`).join('')}
+      ${filtered.length===0?`<div class="muted" style="text-align:center;padding:20px;font-size:.85rem">No customers match</div>`:''}
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-weight:600;font-size:.92rem;margin-bottom:8px">Aging Buckets <span class="muted" style="font-size:.72rem;font-weight:400">tap to include/exclude</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${RPT_BUCKETS.map(b=>{ const on=rptState.activeBuckets.has(b.key);
+        return `<button onclick="rptToggleBucket('${b.key}')" style="padding:6px 14px;border-radius:999px;font-size:.78rem;font-weight:500;border:1.5px solid ${on?'transparent':'#d1d5db'};background:${on?b.bg:'#fff'};color:${on?b.text:'#9ca3af'};cursor:pointer;transition:all .15s">${b.label}</button>`;}).join('')}
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-weight:600;font-size:.92rem;margin-bottom:8px">Breakdown</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+      ${RPT_BREAKDOWNS.map(b=>{ const on=rptState.breakdown===b.key;
+        return `<button onclick="rptState.breakdown='${b.key}';render()" style="padding:10px 6px;border-radius:10px;border:1.5px solid ${on?'var(--primary)':'var(--border)'};background:${on?'var(--primary-light)':'#fff'};color:${on?'var(--primary)':'var(--text-secondary)'};cursor:pointer;text-align:center">
+          <div style="font-size:.8rem;font-weight:600">${b.label}</div>
+          <div style="font-size:.65rem;margin-top:2px;opacity:.8">${b.sub}</div></button>`;}).join('')}
+    </div>
+  </div>
+  <button class="btn btn-primary btn-full btn-lg" ${rptState.selectedIds.size===0?'disabled':''} onclick="rptBuild()">
+    <i data-lucide="bar-chart-2" style="width:18px;height:18px"></i> Build Report${rptState.selectedIds.size>0?' ('+rptState.selectedIds.size+')':''}
+  </button>`;
+}
+function rptRenderReport(){
+  const {reportData,activeBuckets,breakdown}=rptState;
+  const grandTotals={}; RPT_BUCKETS.forEach(b=>grandTotals[b.key]=0); let totalCredits=0;
+  reportData.forEach(({buckets,accountCredit:ac})=>{ RPT_BUCKETS.forEach(b=>grandTotals[b.key]+=buckets[b.key].total); totalCredits+=ac||0; });
+  const activeBktTotal=RPT_BUCKETS.filter(b=>activeBuckets.has(b.key)).reduce((s,b)=>s+grandTotals[b.key],0);
+  const grandNet=activeBktTotal-totalCredits;
+  const sortedData=rptSortCustomers(reportData);
+  const fc=rptActiveFilterCount();
+  const dirIcon=rptState.dir==='asc'?'arrow-up':'arrow-down';
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <button class="btn btn-secondary" onclick="rptState.built=false;render()"><i data-lucide="chevron-left" style="width:15px;height:15px"></i> Edit</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary" style="padding:8px 14px" onclick="printStandin('Balance Report')"><i data-lucide="printer" style="width:15px;height:15px"></i> Print</button>
+      <button class="btn btn-secondary" style="padding:8px 14px" onclick="rptExport()"><i data-lucide="download" style="width:15px;height:15px"></i> Export</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+    <div><div class="muted" style="font-size:.72rem">Net Balance Due</div><div class="muted" style="font-size:.75rem">${reportData.length} customer${reportData.length===1?'':'s'}</div></div>
+    <div style="font-size:1.6rem;font-weight:700;color:var(--danger)">${money(grandNet)}</div>
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+    ${RPT_BUCKETS.filter(b=>activeBuckets.has(b.key)&&grandTotals[b.key]>0).map(b=>`<div style="flex:1;min-width:65px;text-align:center;padding:8px 4px;border-radius:10px;background:${b.bg};color:${b.text}"><div style="font-size:.6rem;font-weight:600">${b.label}</div><div style="font-size:.82rem;font-weight:700;margin-top:2px">${money(grandTotals[b.key])}</div></div>`).join('')}
+    ${totalCredits>0?`<div style="flex:1;min-width:65px;text-align:center;padding:8px 4px;border-radius:10px;background:#f0fdf4;color:#166534"><div style="font-size:.6rem;font-weight:600">Credits</div><div style="font-size:.82rem;font-weight:700;margin-top:2px">−${money(totalCredits)}</div></div>`:''}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">
+    ${RPT_BREAKDOWNS.map(b=>{ const on=rptState.breakdown===b.key;
+      return `<button onclick="rptState.breakdown='${b.key}';rptBuild()" style="padding:8px 4px;border-radius:10px;border:1.5px solid ${on?'var(--primary)':'var(--border)'};background:${on?'var(--primary-light)':'#fff'};color:${on?'var(--primary)':'var(--text-secondary)'};cursor:pointer;text-align:center;font-size:.75rem;font-weight:600">${b.label}</button>`;}).join('')}
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+    <select class="inp" style="flex:1;padding:6px 8px;font-size:.78rem" onchange="rptState.sort=this.value;render()">
+      <option value="balance"   ${rptState.sort==='balance'  ?'selected':''}>Sort: Balance</option>
+      <option value="az"        ${rptState.sort==='az'       ?'selected':''}>Sort: A → Z</option>
+      <option value="lastorder" ${rptState.sort==='lastorder'?'selected':''}>Sort: Last Order</option>
+      <option value="frequency" ${rptState.sort==='frequency'?'selected':''}>Sort: Frequency</option>
+    </select>
+    <button class="iconbtn" title="Toggle direction" style="border:1px solid var(--border);border-radius:8px;width:34px;height:34px;flex:0 0 34px" onclick="rptState.dir=rptState.dir==='asc'?'desc':'asc';render()">
+      <i data-lucide="${dirIcon}" style="width:15px;height:15px"></i>
+    </button>
+    <button class="btn btn-secondary" style="padding:6px 10px;font-size:.78rem;position:relative;white-space:nowrap;flex:0 0 auto" onclick="openRptFilterSheet()">
+      <i data-lucide="sliders-horizontal" style="width:14px;height:14px"></i> Filters
+      ${fc?`<span style="position:absolute;top:-4px;right:-4px;background:var(--primary);color:#fff;border-radius:999px;font-size:.6rem;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;padding:0 3px">${fc}</span>`:''}
+    </button>
+  </div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">
+    ${RPT_BUCKETS.map(b=>{ const on=activeBuckets.has(b.key);
+      return `<button onclick="rptToggleBucket('${b.key}')" style="padding:4px 10px;border-radius:999px;font-size:.7rem;font-weight:500;border:1px solid ${on?'transparent':'#d1d5db'};background:${on?b.bg:'#fff'};color:${on?b.text:'#9ca3af'};cursor:pointer">${b.label}</button>`;}).join('')}
+  </div>
+  ${sortedData.map(({customer,buckets,openInvoices,allInvoices,totalBalance,accountCredit,netBalance})=>{
+    if(rptState.types.size&&!rptState.types.has(customer.type)) return '';
+    const activeBkts=RPT_BUCKETS.filter(b=>activeBuckets.has(b.key)&&buckets[b.key].total>0);
+    const custGross=activeBkts.reduce((s,b)=>s+buckets[b.key].total,0);
+    const custNet=custGross-(accountCredit||0);
+    let txns=[];
+    if(breakdown==='open') txns=openInvoices.filter(i=>activeBuckets.has(i.bucketKey));
+    else if(breakdown==='all') txns=allInvoices;
+    if(breakdown!=='balance'&&txns.length===0&&totalBalance===0) return '';
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:${breakdown==='balance'?'0':'8'}px">
+        <div style="flex:1;min-width:0;cursor:pointer" onclick="location.hash='#customers/${customer.id}'">
+          <div style="font-weight:600;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(customer.name)}</div>
+          <div class="muted" style="font-size:.72rem">${esc(customer.code)} · ${esc(customer.type)}${customer.contact?' · '+esc(customer.contact):''}</div>
+          ${customer.phone&&breakdown!=='balance'?`<div class="muted" style="font-size:.7rem"><a href="tel:${esc(customer.phone)}" style="color:var(--primary);text-decoration:none">📞 ${esc(customer.phone)}</a></div>`:''}
+        </div>
+        <div style="text-align:right;flex:0 0 auto;margin-left:10px">
+          <div style="font-weight:700;font-size:1rem;color:${custNet>0?'var(--danger)':'var(--text-muted)'}">${money(custNet)}</div>
+          ${accountCredit>0?`<div style="font-size:.7rem;color:#166534">−${money(accountCredit)} credit</div>`:''}
+        </div>
+      </div>
+      ${breakdown!=='balance'&&activeBkts.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">
+        ${activeBkts.map(b=>`<span style="font-size:.7rem;padding:2px 10px;border-radius:999px;background:${b.bg};color:${b.text}">${b.label}: ${money(buckets[b.key].total)}</span>`).join('')}
+      </div>`:''}
+      ${breakdown!=='balance'&&txns.length?`<div style="border-top:1px solid var(--border);margin-top:4px">
+        ${txns.map(inv=>{ const bkt=RPT_BUCKETS.find(b=>b.key===inv.bucketKey);
+          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="location.hash='#invoices/${inv.id}'">
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span class="mono" style="font-size:.8rem;font-weight:600">${esc(inv.invoiceNumber)}</span>
+                ${statusBadge(inv.status)}
+              </div>
+              <div class="muted" style="font-size:.7rem;margin-top:2px">Due ${fmtDate(inv.dueDate)}${inv.daysOverdue>0&&inv.status!=='Paid'?' · '+inv.daysOverdue+'d':''}${bkt&&inv.status!=='Paid'?` · <span style="color:${bkt.text}">${bkt.label}</span>`:''}</div>
+            </div>
+            <div style="text-align:right;flex:0 0 auto;margin-left:8px">
+              <div style="font-weight:600;font-size:.85rem">${money(inv.status==='Paid'?inv.grandTotal:inv.amountDue)}</div>
+              ${inv.status==='Partial'?`<div class="muted" style="font-size:.65rem">of ${money(inv.grandTotal)}</div>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`:''}
+      ${breakdown!=='balance'&&netBalance>0?`<button class="btn btn-primary btn-full" style="margin-top:8px;padding:6px;font-size:.8rem" onclick="event.stopPropagation();startPayment('${customer.id}')">💳 Collect Payment</button>`:''}
+    </div>`;
+  }).filter(s=>s).join('')||empty('check-circle','No data for selected filters','')}`;
+}
 function returnsReportWidget(){ const pending=RETURNS.filter(r=>r.status==='Pending').length; const processed=RETURNS.filter(r=>r.status==='Processed').length;
   const damaged=RETURNS.reduce((s,r)=>s+r.lineItems.filter(l=>l.isDamaged).reduce((a,l)=>a+l.quantity,0),0);
   const byCust={}; RETURNS.forEach(r=>{byCust[r.customerId]=(byCust[r.customerId]||0)+r.grandTotal;});
@@ -1425,7 +1964,7 @@ function markLinkPaid(id){ const l=PAYMENT_LINKS.find(x=>x.id===id); l.status='p
   NOTIFICATIONS.unshift({id:uid('n'),userId:CURRENT_USER_ID,icon:'dollar-sign',iconType:'payment',title:'Payment received',body:`${money(l.amount)} from ${c.name} via payment link`,ts:new Date().toISOString(),read:false,linkTo:'#payments'});
   toast('Payment received'); render(); }
 /* ===================== DRIVER: ROUTE ===================== */
-route('route',{ root:true, title:'My Route', headerRight:()=>bellBtn(),
+route('route',{ root:true, title:'My Route', headerRight:()=>bellBtn()+hamBtn(),
   render:()=>{ const stops=ROUTE_STOPS.slice().sort((a,b)=>a.seq-b.seq);
     return `<div class="muted" style="font-size:.8rem;margin-bottom:8px">${fmtDate(todayISO())} · ${stops.length} stops</div>
       ${stops.map(s=>{ const o=ORD(s.orderId); const c=CUST(o.customerId);
